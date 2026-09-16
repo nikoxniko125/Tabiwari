@@ -16,7 +16,6 @@ interface ExpenseModalProps {
   isDark: boolean;
 }
 
-// 內建常用貨幣選單，避免引用未導出的變數
 const CURRENCY_OPTIONS = [
   { code: 'HKD', symbol: 'HK$', name: '港幣' },
   { code: 'JPY', symbol: '¥', name: '日圓' },
@@ -36,7 +35,9 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({
   trip,
   isDark,
 }) => {
-  const defaultCurrency = trip.baseCurrency || 'HKD';
+  const defaultCurrency = trip?.baseCurrency || 'HKD';
+  const categoriesList = Array.isArray(EXPENSE_CATEGORIES) ? EXPENSE_CATEGORIES : [];
+  const paymentMethodsList = Array.isArray(PAYMENT_METHODS) ? PAYMENT_METHODS : [];
   
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState<ExpenseCategory>('food');
@@ -60,18 +61,22 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({
       const todayStr = now.toISOString().split('T')[0];
       const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 
+      const participants = trip?.participants || [];
+      const defaultPayer = participants[0]?.id || 'p-1';
+      const defaultInvolved = participants.map((p) => p.id);
+
       if (initialExpense) {
-        setTitle(initialExpense.title);
-        setCategory(initialExpense.category);
-        setSubcategory(initialExpense.subcategory || '');
+        setTitle(initialExpense.title || '');
+        setCategory(initialExpense.category || 'food');
+        setSubcategory(initialExpense.subcategory || '餐飲');
         setAmount(initialExpense.amount ? String(initialExpense.amount) : '');
-        setCurrency(initialExpense.currency);
+        setCurrency(initialExpense.currency || defaultCurrency);
         setExchangeRate(initialExpense.exchangeRate || 1);
-        setPayerId(initialExpense.payerId);
-        setSplitType(initialExpense.splitType);
-        setInvolvedParticipantIds(initialExpense.involvedParticipantIds || trip.participants.map(p => p.id));
+        setPayerId(initialExpense.payerId || defaultPayer);
+        setSplitType(initialExpense.splitType || 'equal');
+        setInvolvedParticipantIds(initialExpense.involvedParticipantIds || defaultInvolved);
         setSplitDetails(initialExpense.splitDetails || {});
-        setPaymentMethod(initialExpense.paymentMethod);
+        setPaymentMethod(initialExpense.paymentMethod || 'credit_card');
         setDate(initialExpense.date || todayStr);
         setTime(initialExpense.time || timeStr);
         setLocation(initialExpense.location || '');
@@ -83,9 +88,9 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({
         setAmount('');
         setCurrency(defaultCurrency);
         setExchangeRate(1);
-        setPayerId(trip.participants[0]?.id || '');
+        setPayerId(defaultPayer);
         setSplitType('equal');
-        setInvolvedParticipantIds(trip.participants.map(p => p.id));
+        setInvolvedParticipantIds(defaultInvolved);
         setSplitDetails({});
         setPaymentMethod('credit_card');
         setDate(todayStr);
@@ -98,13 +103,14 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({
 
   if (!isOpen) return null;
 
-  const currentCurrencyInfo = getCurrencyInfo(currency);
+  const currentCurrencyInfo = getCurrencyInfo ? getCurrencyInfo(currency) : null;
 
   const handleSave = () => {
     const numAmount = parseFloat(amount) || 0;
     if (numAmount <= 0) return;
 
     const converted = numAmount * (exchangeRate || 1);
+    const participants = trip?.participants || [];
 
     onSave({
       title: title.trim() || subcategory || '日常消費',
@@ -114,7 +120,7 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({
       currency,
       exchangeRate,
       convertedAmount: converted,
-      payerId: payerId || trip.participants[0]?.id,
+      payerId: payerId || participants[0]?.id || 'p-1',
       splitType,
       involvedParticipantIds,
       splitDetails,
@@ -137,6 +143,8 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({
       setInvolvedParticipantIds([...involvedParticipantIds, pId]);
     }
   };
+
+  const participants = trip?.participants || [];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in">
@@ -222,7 +230,7 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({
           <div className="space-y-2">
             <label className="text-xs font-medium opacity-80">消費分類</label>
             <div className="grid grid-cols-4 gap-2">
-              {EXPENSE_CATEGORIES.map((cat: any) => {
+              {categoriesList.map((cat: any) => {
                 const isSelected = category === cat.id;
                 return (
                   <button
@@ -254,7 +262,7 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({
           <div className="space-y-2">
             <label className="text-xs font-medium opacity-80">誰付款墊付？</label>
             <div className="flex flex-wrap gap-2">
-              {trip.participants.map((p) => {
+              {participants.map((p) => {
                 const isPayer = payerId === p.id;
                 return (
                   <button
@@ -284,7 +292,7 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({
           <div className="space-y-2">
             <label className="text-xs font-medium opacity-80">參與分帳人員 (點擊切換)</label>
             <div className="flex flex-wrap gap-2">
-              {trip.participants.map((p) => {
+              {participants.map((p) => {
                 const isInvolved = involvedParticipantIds.includes(p.id);
                 return (
                   <button
@@ -321,7 +329,7 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({
                     : 'bg-white border-[#E2D9CC] text-[#2C2622]'
                 }`}
               >
-                {PAYMENT_METHODS.map((m: any) => (
+                {paymentMethodsList.map((m: any) => (
                   <option key={m.id} value={m.id}>
                     {m.icon} {m.name}
                   </option>
