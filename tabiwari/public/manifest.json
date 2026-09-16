@@ -1,0 +1,21 @@
+{
+  "name": "旅割・旅行記帳分帳",
+  "short_name": "旅割",
+  "description": "暖心旅行記帳 App，支援多人旅行分帳、多國貨幣換算、細緻支出分類、清算結餘與明細統計",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FAF7F2",
+  "theme_color": "#FAF7F2",
+  "icons": [
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

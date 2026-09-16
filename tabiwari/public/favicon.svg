@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FDFBF7"/>
+      <stop offset="100%" stop-color="#F3ECE0"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="16" flood-color="#5C4530" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+  <!-- Background with subtle warm border -->
+  <rect width="512" height="512" rx="112" fill="url(#bgGrad)"/>
+  <rect x="8" y="8" width="496" height="496" rx="104" fill="none" stroke="#E2D4C0" stroke-width="8"/>
+  
+  <!-- Outer decorative circle -->
+  <circle cx="256" cy="256" r="176" fill="#FAF5ED" stroke="#DECBB5" stroke-width="6" filter="url(#shadow)"/>
+  
+  <!-- Japanese Torii Gate / Travel Emblem -->
+  <g id="torii-emblem">
+    <!-- Top curved beam (Kasagi) -->
+    <path d="M 120 188 C 200 172, 312 172, 392 188 L 388 212 C 314 198, 198 198, 124 212 Z" fill="#C85A53"/>
+    <!-- Second straight beam (Shimaki/Nuki) -->
+    <rect x="144" y="226" width="224" height="22" rx="6" fill="#B34B45"/>
+    <!-- Two Main Pillars -->
+    <path d="M 182 204 L 172 356 L 196 356 L 202 204 Z" fill="#C85A53"/>
+    <path d="M 310 204 L 316 356 L 340 356 L 330 204 Z" fill="#C85A53"/>
+    <!-- Small central tablet support (Gakuzuka) -->
+    <rect x="246" y="210" width="20" height="20" rx="3" fill="#2C2622"/>
+    <!-- Central Kanji or Coin emblem: 割 -->
+    <circle cx="256" cy="290" r="28" fill="#F4EFE6" stroke="#C85A53" stroke-width="4"/>
+    <!-- Compass / Airplane mini motif -->
+    <path d="M 256 272 L 264 290 L 256 286 L 248 290 Z" fill="#C85A53"/>
+    <path d="M 256 308 L 248 290 L 256 294 L 264 290 Z" fill="#8C6E54"/>
+  </g>
+
+  <!-- Small Japanese Sun / Stamp motif -->
+  <circle cx="376" cy="144" r="28" fill="#E88374" opacity="0.85"/>
+</svg>
