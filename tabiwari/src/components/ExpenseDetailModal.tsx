@@ -1,364 +1,295 @@
-import React, { useState, useEffect } from 'react';
-import { X, Check } from 'lucide-react';
-import { Trip, ExpenseItem, ExpenseCategory, SplitType, PaymentMethod } from '../types';
+import React from 'react';
 import { 
-  EXPENSE_CATEGORIES, 
-  COMMON_CURRENCIES, 
-  PAYMENT_METHODS, 
-  getCurrencyInfo 
-} from '../utils/expenseConstants';
+  X, Calendar, Clock, MapPin, CreditCard, DollarSign, 
+  Users, Edit3, Trash2, Tag, FileText 
+} from 'lucide-react';
+import { ExpenseItem, Trip } from '../types';
+import { EXPENSE_CATEGORIES, PAYMENT_METHODS, getCurrencyInfo } from '../utils/expenseConstants';
+import { getParticipantColor } from '../utils/participantUtils';
 
-interface ExpenseModalProps {
+interface ExpenseDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (expense: Partial<ExpenseItem>) => void;
-  initialExpense: ExpenseItem | null;
+  expense: ExpenseItem | null;
   trip: Trip;
-  isDark: boolean;
+  onEdit: (expense: ExpenseItem) => void;
+  onDelete: (expenseId: string) => void;
+  isDark?: boolean;
 }
 
-export const ExpenseModal: React.FC<ExpenseModalProps> = ({
+export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({
   isOpen,
   onClose,
-  onSave,
-  initialExpense,
+  expense,
   trip,
-  isDark,
+  onEdit,
+  onDelete,
+  isDark = false,
 }) => {
-  const defaultCurrency = trip.baseCurrency || 'HKD';
-  
-  const [title, setTitle] = useState('');
-  const [category, setCategory] = useState<ExpenseCategory>('food');
-  const [subcategory, setSubcategory] = useState('餐飲');
-  const [amount, setAmount] = useState<string>('');
-  const [currency, setCurrency] = useState(defaultCurrency);
-  const [exchangeRate, setExchangeRate] = useState<number>(1);
-  const [payerId, setPayerId] = useState('');
-  const [splitType, setSplitType] = useState<SplitType>('equal');
-  const [involvedParticipantIds, setInvolvedParticipantIds] = useState<string[]>([]);
-  const [splitDetails, setSplitDetails] = useState<Record<string, number>>({});
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('credit_card');
-  const [date, setDate] = useState('');
-  const [time, setTime] = useState('');
-  const [location, setLocation] = useState('');
-  const [notes, setNotes] = useState('');
+  if (!isOpen || !expense) return null;
 
-  useEffect(() => {
-    if (isOpen) {
-      const now = new Date();
-      const todayStr = now.toISOString().split('T')[0];
-      const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+  const participants = trip.participants || [];
+  const baseCurrency = trip.baseCurrency || 'HKD';
+  const categoryMeta = EXPENSE_CATEGORIES[expense.category] || EXPENSE_CATEGORIES.other;
+  const paymentMethodInfo = PAYMENT_METHODS[expense.paymentMethod] || PAYMENT_METHODS.credit_card;
+  const currInfo = getCurrencyInfo(expense.currency);
+  const baseCurrInfo = getCurrencyInfo(baseCurrency);
 
-      if (initialExpense) {
-        setTitle(initialExpense.title);
-        setCategory(initialExpense.category);
-        setSubcategory(initialExpense.subcategory || '');
-        setAmount(initialExpense.amount ? String(initialExpense.amount) : '');
-        setCurrency(initialExpense.currency);
-        setExchangeRate(initialExpense.exchangeRate || 1);
-        setPayerId(initialExpense.payerId);
-        setSplitType(initialExpense.splitType);
-        setInvolvedParticipantIds(initialExpense.involvedParticipantIds || trip.participants.map(p => p.id));
-        setSplitDetails(initialExpense.splitDetails || {});
-        setPaymentMethod(initialExpense.paymentMethod);
-        setDate(initialExpense.date || todayStr);
-        setTime(initialExpense.time || timeStr);
-        setLocation(initialExpense.location || '');
-        setNotes(initialExpense.notes || '');
-      } else {
-        setTitle('');
-        setCategory('food');
-        setSubcategory('餐飲');
-        setAmount('');
-        setCurrency(defaultCurrency);
-        setExchangeRate(1);
-        setPayerId(trip.participants[0]?.id || '');
-        setSplitType('equal');
-        setInvolvedParticipantIds(trip.participants.map(p => p.id));
-        setSplitDetails({});
-        setPaymentMethod('credit_card');
-        setDate(todayStr);
-        setTime(timeStr);
-        setLocation('');
-        setNotes('');
-      }
-    }
-  }, [isOpen, initialExpense, trip, defaultCurrency]);
-
-  if (!isOpen) return null;
-
-  const currentCurrencyInfo = getCurrencyInfo(currency);
-
-  const handleSave = () => {
-    const numAmount = parseFloat(amount) || 0;
-    if (numAmount <= 0) return;
-
-    const converted = numAmount * (exchangeRate || 1);
-
-    onSave({
-      title: title.trim() || subcategory || '日常消費',
-      category,
-      subcategory,
-      amount: numAmount,
-      currency,
-      exchangeRate,
-      convertedAmount: converted,
-      payerId: payerId || trip.participants[0]?.id,
-      splitType,
-      involvedParticipantIds,
-      splitDetails,
-      paymentMethod,
-      date,
-      time,
-      location,
-      notes,
-    });
-
-    onClose();
-  };
-
-  const toggleParticipant = (pId: string) => {
-    if (involvedParticipantIds.includes(pId)) {
-      if (involvedParticipantIds.length > 1) {
-        setInvolvedParticipantIds(involvedParticipantIds.filter(id => id !== pId));
-      }
-    } else {
-      setInvolvedParticipantIds([...involvedParticipantIds, pId]);
-    }
+  const payer = participants.find((p) => p.id === expense.payerId) || {
+    id: expense.payerId,
+    name: '未知成員',
+    avatarColor: '#8C6E54',
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in">
+    <div
+      id="expense-detail-modal-backdrop"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/50 backdrop-blur-xs overflow-y-auto animate-fadeIn"
+      onClick={onClose}
+    >
       <div
-        className={`w-full max-w-lg rounded-3xl border shadow-2xl overflow-hidden flex flex-col max-h-[90vh] transition-all ${
+        id="expense-detail-dialog"
+        className={`w-full max-w-lg rounded-3xl border shadow-xl overflow-hidden my-6 transition-all ${
           isDark
-            ? 'bg-[#23201D] border-[#38312A] text-[#EDE7DF]'
-            : 'bg-[#FFFFFF] border-[#EAE3D8] text-[#2C2622]'
+            ? 'bg-[#23201D] border-[#3C352E] text-[#EDE7DF]'
+            : 'bg-[#FAF8F3] border-[#E8E1D5] text-[#2C2622]'
         }`}
+        onClick={(e) => e.stopPropagation()}
       >
-        {/* Modal Header */}
-        <div className="p-5 border-b border-stone-200 dark:border-stone-800 flex items-center justify-between shrink-0">
-          <h3 className="text-base font-mincho font-bold">
-            {initialExpense ? '編輯支出明細' : '新增旅途支出記帳'}
-          </h3>
+        {/* Header with category color bar */}
+        <div
+          className="p-6 border-b flex items-start justify-between relative"
+          style={{
+            backgroundColor: isDark ? categoryMeta.bgColorDark : categoryMeta.bgColorLight,
+            borderColor: isDark ? '#3C352E' : categoryMeta.borderColorLight,
+          }}
+        >
+          <div className="flex items-start gap-3">
+            <span className="text-3xl p-2 rounded-2xl bg-white/40 dark:bg-black/20 shadow-2xs">
+              {categoryMeta.icon}
+            </span>
+            <div>
+              <div className="flex flex-wrap items-center gap-2 mb-1">
+                <span className="text-xs px-2.5 py-0.5 rounded-full font-medium bg-white/70 dark:bg-black/30">
+                  {categoryMeta.name} · {expense.subcategory}
+                </span>
+                <span className="text-xs px-2 py-0.5 rounded-full bg-white/50 dark:bg-black/20 opacity-80">
+                  {paymentMethodInfo.icon} {paymentMethodInfo.label}
+                </span>
+              </div>
+              <h2 className="text-xl font-mincho font-semibold leading-snug">
+                {expense.title}
+              </h2>
+            </div>
+          </div>
+
           <button
             onClick={onClose}
-            className="p-1 rounded-full opacity-60 hover:opacity-100 transition-opacity"
+            className="p-1.5 rounded-xl hover:bg-black/10 dark:hover:bg-white/10 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Modal Body */}
-        <div className="p-6 overflow-y-auto space-y-5">
+        {/* Amount & Key Details */}
+        <div className="p-6 space-y-6">
           
-          {/* 金額與幣別 (徹底移除框內文字重疊) */}
-          <div className="space-y-2">
-            <label className="text-xs font-medium opacity-80">
-              消費金額 ({currency} {currentCurrencyInfo.symbol})
-            </label>
-            <div className="flex gap-2">
-              <input
-                type="number"
-                step="any"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                placeholder="0.00"
-                autoFocus
-                className={`flex-1 px-4 py-3 rounded-2xl border text-lg font-semibold focus:outline-none transition-colors ${
-                  isDark
-                    ? 'bg-[#2A2521] border-[#433B33] text-[#EDE7DF] focus:border-[#D4A373]'
-                    : 'bg-white border-[#E2D9CC] text-[#2C2622] focus:border-[#8C6E54]'
-                }`}
-              />
-
-              {/* 幣別切換 */}
-              <select
-                value={currency}
-                onChange={(e) => setCurrency(e.target.value)}
-                className={`px-3 py-3 rounded-2xl border text-sm font-medium focus:outline-none ${
-                  isDark
-                    ? 'bg-[#2A2521] border-[#433B33] text-[#EDE7DF]'
-                    : 'bg-white border-[#E2D9CC] text-[#2C2622]'
-                }`}
-              >
-                {COMMON_CURRENCIES.map((c) => (
-                  <option key={c.code} value={c.code}>
-                    {c.code} ({c.symbol})
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          {/* 支出名稱 / 項目 */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium opacity-80">項目說明</label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="例如：一蘭拉麵、酒店訂金、新幹線車票..."
-              className={`w-full px-4 py-2.5 rounded-xl border text-sm focus:outline-none transition-colors ${
-                isDark
-                  ? 'bg-[#2A2521] border-[#433B33] text-[#EDE7DF] focus:border-[#D4A373]'
-                  : 'bg-white border-[#E2D9CC] text-[#2C2622] focus:border-[#8C6E54]'
-              }`}
-            />
-          </div>
-
-          {/* 分類選擇 */}
-          <div className="space-y-2">
-            <label className="text-xs font-medium opacity-80">消費分類</label>
-            <div className="grid grid-cols-4 gap-2">
-              {EXPENSE_CATEGORIES.map((cat) => {
-                const isSelected = category === cat.id;
-                return (
-                  <button
-                    key={cat.id}
-                    type="button"
-                    onClick={() => {
-                      setCategory(cat.id as ExpenseCategory);
-                      setSubcategory(cat.name);
-                    }}
-                    className={`py-2 px-2 rounded-xl border text-xs flex flex-col items-center gap-1 transition-all ${
-                      isSelected
-                        ? isDark
-                          ? 'bg-[#D4A373] border-[#D4A373] text-[#1A1816] font-semibold'
-                          : 'bg-[#2C2622] border-[#2C2622] text-[#FAF8F3] font-semibold'
-                        : isDark
-                        ? 'bg-[#2A2521] border-[#433B33] opacity-70 hover:opacity-100'
-                        : 'bg-white border-[#E2D9CC] opacity-70 hover:opacity-100'
-                    }`}
-                  >
-                    <span className="text-base">{cat.icon}</span>
-                    <span>{cat.name}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* 誰先墊付付款 (Payer) */}
-          <div className="space-y-2">
-            <label className="text-xs font-medium opacity-80">誰付款墊付？</label>
-            <div className="flex flex-wrap gap-2">
-              {trip.participants.map((p) => {
-                const isPayer = payerId === p.id;
-                return (
-                  <button
-                    key={p.id}
-                    type="button"
-                    onClick={() => setPayerId(p.id)}
-                    className={`px-3 py-1.5 rounded-xl border text-xs font-medium flex items-center gap-1.5 transition-all ${
-                      isPayer
-                        ? 'bg-[#3D7A64] border-[#3D7A64] text-white shadow-xs'
-                        : isDark
-                        ? 'bg-[#2A2521] border-[#433B33] opacity-70 hover:opacity-100'
-                        : 'bg-white border-[#E2D9CC] opacity-70 hover:opacity-100'
-                    }`}
-                  >
-                    <span
-                      className="w-2.5 h-2.5 rounded-full"
-                      style={{ backgroundColor: p.avatarColor }}
-                    />
-                    <span>{p.name}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* 參與分帳成員 */}
-          <div className="space-y-2">
-            <label className="text-xs font-medium opacity-80">參與分帳人員 (點擊切換)</label>
-            <div className="flex flex-wrap gap-2">
-              {trip.participants.map((p) => {
-                const isInvolved = involvedParticipantIds.includes(p.id);
-                return (
-                  <button
-                    key={p.id}
-                    type="button"
-                    onClick={() => toggleParticipant(p.id)}
-                    className={`px-3 py-1.5 rounded-xl border text-xs font-medium flex items-center gap-1.5 transition-all ${
-                      isInvolved
-                        ? isDark
-                          ? 'bg-[#D4A373]/20 border-[#D4A373] text-[#D4A373]'
-                          : 'bg-[#8C6E54]/10 border-[#8C6E54] text-[#8C6E54]'
-                        : isDark
-                        ? 'bg-[#2A2521] border-[#433B33] opacity-40 line-through'
-                        : 'bg-white border-[#E2D9CC] opacity-40 line-through'
-                    }`}
-                  >
-                    <span>{p.name}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* 付款方式與日期 */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <label className="text-xs font-medium opacity-80">付款方式</label>
-              <select
-                value={paymentMethod}
-                onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
-                className={`w-full px-3 py-2 rounded-xl border text-xs focus:outline-none ${
-                  isDark
-                    ? 'bg-[#2A2521] border-[#433B33] text-[#EDE7DF]'
-                    : 'bg-white border-[#E2D9CC] text-[#2C2622]'
-                }`}
-              >
-                {PAYMENT_METHODS.map((m) => (
-                  <option key={m.id} value={m.id}>
-                    {m.icon} {m.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-xs font-medium opacity-80">消費日期</label>
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className={`w-full px-3 py-2 rounded-xl border text-xs focus:outline-none ${
-                  isDark
-                    ? 'bg-[#2A2521] border-[#433B33] text-[#EDE7DF]'
-                    : 'bg-white border-[#E2D9CC] text-[#2C2622]'
-                }`}
-              />
-            </div>
-          </div>
-
-        </div>
-
-        {/* Modal Footer */}
-        <div className="p-5 border-t border-stone-200 dark:border-stone-800 flex items-center justify-end gap-2 shrink-0">
-          <button
-            onClick={onClose}
-            className="px-4 py-2.5 rounded-xl text-xs font-medium border border-stone-300 dark:border-stone-700 opacity-80 hover:opacity-100 transition-opacity"
-          >
-            取消
-          </button>
-          <button
-            onClick={handleSave}
-            disabled={!amount || parseFloat(amount) <= 0}
-            className={`px-6 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs ${
-              !amount || parseFloat(amount) <= 0
-                ? 'opacity-40 cursor-not-allowed bg-stone-500 text-white'
-                : isDark
-                ? 'bg-[#D4A373] text-[#1A1816] hover:bg-[#C29060]'
-                : 'bg-[#2C2622] text-[#FAF8F3] hover:bg-[#433D39]'
+          {/* Large Amount Display */}
+          <div
+            className={`p-4 rounded-2xl border flex items-center justify-between ${
+              isDark ? 'bg-[#2A2521] border-[#3D352D]' : 'bg-[#FFFFFF] border-[#E8E1D5]'
             }`}
           >
-            <Check className="w-4 h-4" />
-            <span>儲存記帳</span>
-          </button>
-        </div>
+            <div>
+              <p className="text-xs opacity-60">消費原幣金額</p>
+              <p className="text-2xl font-bold font-mono">
+                {currInfo.symbol} {expense.amount.toLocaleString()} <span className="text-sm font-normal">{expense.currency}</span>
+              </p>
+            </div>
 
+            {expense.currency !== baseCurrency && (
+              <div className="text-right">
+                <p className="text-xs opacity-60">折合基準貨幣 (1:{expense.exchangeRate})</p>
+                <p className="text-lg font-semibold font-mono text-[#8C6E54] dark:text-[#D4A373]">
+                  {baseCurrInfo.symbol} {expense.convertedAmount.toLocaleString()} {baseCurrency}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Who Paid & When */}
+          <div className="grid grid-cols-2 gap-3 text-xs">
+            <div
+              className={`p-3 rounded-xl border ${
+                isDark ? 'bg-[#2A2521] border-[#3D352D]' : 'bg-[#FFFFFF] border-[#E8E1D5]'
+              }`}
+            >
+              <p className="opacity-60 mb-1">付款人 (誰先付的)</p>
+              <div className="flex items-center gap-2">
+                <div
+                  className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[11px] font-medium"
+                  style={{ backgroundColor: getParticipantColor(payer) }}
+                >
+                  {(payer?.name || '旅').charAt(0)}
+                </div>
+                <span className="font-semibold text-sm truncate">{payer?.name || '未知成員'}</span>
+              </div>
+            </div>
+
+            <div
+              className={`p-3 rounded-xl border ${
+                isDark ? 'bg-[#2A2521] border-[#3D352D]' : 'bg-[#FFFFFF] border-[#E8E1D5]'
+              }`}
+            >
+              <p className="opacity-60 mb-1">消費時間</p>
+              <div className="flex items-center gap-1.5 font-medium">
+                <Calendar className="w-3.5 h-3.5 opacity-60" />
+                <span>{expense.date}</span>
+                {expense.time && <span>· {expense.time}</span>}
+              </div>
+            </div>
+          </div>
+
+          {/* Location & Notes */}
+          {(expense.location || expense.notes) && (
+            <div
+              className={`p-3.5 rounded-xl border text-xs space-y-1.5 ${
+                isDark ? 'bg-[#2A2521] border-[#3D352D]' : 'bg-[#FFFFFF] border-[#E8E1D5]'
+              }`}
+            >
+              {expense.location && (
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-3.5 h-3.5 text-[#8C6E54] dark:text-[#D4A373] shrink-0" />
+                  <span>{expense.location}</span>
+                </div>
+              )}
+              {expense.notes && (
+                <div className="flex items-start gap-2">
+                  <FileText className="w-3.5 h-3.5 opacity-60 shrink-0 mt-0.5" />
+                  <p className="leading-relaxed opacity-90">{expense.notes}</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Split Breakdown: 邊個用咗幾多錢 */}
+          <div
+            className={`p-4 rounded-2xl border space-y-3 ${
+              isDark ? 'bg-[#2A2521] border-[#3D352D]' : 'bg-[#FFFFFF] border-[#E8E1D5]'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Users className="w-4 h-4 text-[#8C6E54] dark:text-[#D4A373]" />
+                <h3 className="text-xs font-semibold uppercase tracking-wider">
+                  分攤明細 (邊個用咗幾多錢)
+                </h3>
+              </div>
+              <span className="text-[11px] px-2 py-0.5 rounded-md bg-[#FAF5EE] dark:bg-[#322A22] text-[#8C6E54] dark:text-[#D4A373]">
+                {expense.splitType === 'equal' && '均等平分'}
+                {expense.splitType === 'custom' && '自訂金額'}
+                {expense.splitType === 'personal' && '個人專屬支出'}
+              </span>
+            </div>
+
+            <div className="space-y-2">
+              {participants.map((p, pIdx) => {
+                const shareAmount = expense.splitDetails?.[p.id] ?? 0;
+                const isPayer = p.id === expense.payerId;
+                const percent = expense.convertedAmount > 0 
+                  ? Math.round((shareAmount / expense.convertedAmount) * 100) 
+                  : 0;
+
+                return (
+                  <div
+                    key={p.id}
+                    className={`flex items-center justify-between p-2.5 rounded-xl text-xs ${
+                      shareAmount > 0
+                        ? isDark
+                          ? 'bg-[#322C27]'
+                          : 'bg-[#FAF8F3]'
+                        : 'opacity-40'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div
+                        className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[11px]"
+                        style={{ backgroundColor: getParticipantColor(p, pIdx) }}
+                      >
+                        {(p.name || '旅').charAt(0)}
+                      </div>
+                      <div>
+                        <span className="font-medium">{p.name || '成員'}</span>
+                        {isPayer && (
+                          <span className="ml-1.5 text-[10px] px-1.5 py-0.2 rounded bg-[#EFEAE1] dark:bg-[#433B33]">
+                            已付全額
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="text-right">
+                      {shareAmount > 0 ? (
+                        <>
+                          <span className="font-mono font-semibold">
+                            {baseCurrInfo.symbol} {shareAmount.toLocaleString()}
+                          </span>
+                          <span className="text-[10px] opacity-60 ml-1.5">({percent}%)</span>
+                        </>
+                      ) : (
+                        <span className="text-[11px] opacity-50">未參與此項</span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Receipt Photo Preview if present */}
+          {expense.receiptPhoto && (
+            <div>
+              <p className="text-xs opacity-60 mb-2">收據照片憑單</p>
+              <div className="rounded-2xl overflow-hidden border border-[#E8E1D5] dark:border-[#3D352D] max-h-64 bg-black/5">
+                <img
+                  src={expense.receiptPhoto}
+                  alt="Receipt"
+                  className="w-full h-full object-contain"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Action Buttons */}
+          <div className="flex items-center justify-between pt-2 border-t border-[#EBE4D8] dark:border-[#38322B]">
+            <button
+              onClick={() => {
+                if (confirm(`確定要刪除「${expense.title}」這筆記帳嗎？`)) {
+                  onDelete(expense.id);
+                  onClose();
+                }
+              }}
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs text-[#C55353] hover:bg-[#FDF2F0] dark:hover:bg-[#352020] transition-colors"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>刪除記帳</span>
+            </button>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  onClose();
+                  onEdit(expense);
+                }}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-medium border border-[#E3D8C8] dark:border-[#433B33] hover:bg-[#F5EFE6] dark:hover:bg-[#322C27] transition-colors"
+              >
+                <Edit3 className="w-3.5 h-3.5 text-[#8C6E54] dark:text-[#D4A373]" />
+                <span>編輯資料</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
       </div>
     </div>
   );
