@@ -3,7 +3,6 @@ import { X, Check } from 'lucide-react';
 import { Trip, ExpenseItem, ExpenseCategory, SplitType, PaymentMethod } from '../types';
 import { 
   EXPENSE_CATEGORIES, 
-  COMMON_CURRENCIES, 
   PAYMENT_METHODS, 
   getCurrencyInfo 
 } from '../utils/expenseConstants';
@@ -16,6 +15,18 @@ interface ExpenseModalProps {
   trip: Trip;
   isDark: boolean;
 }
+
+// 內建常用貨幣選單，避免引用未導出的變數
+const CURRENCY_OPTIONS = [
+  { code: 'HKD', symbol: 'HK$', name: '港幣' },
+  { code: 'JPY', symbol: '¥', name: '日圓' },
+  { code: 'TWD', symbol: 'NT$', name: '新台幣' },
+  { code: 'USD', symbol: '$', name: '美元' },
+  { code: 'EUR', symbol: '€', name: '歐元' },
+  { code: 'KRW', symbol: '₩', name: '韓元' },
+  { code: 'CNY', symbol: '¥', name: '人民幣' },
+  { code: 'GBP', symbol: '£', name: '英鎊' },
+];
 
 export const ExpenseModal: React.FC<ExpenseModalProps> = ({
   isOpen,
@@ -155,7 +166,7 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({
           {/* 金額與幣別 */}
           <div className="space-y-2">
             <label className="text-xs font-medium opacity-80">
-              消費金額 ({currency} {currentCurrencyInfo.symbol})
+              消費金額 ({currency} {currentCurrencyInfo?.symbol || ''})
             </label>
             <div className="flex gap-2">
               <input
@@ -182,7 +193,7 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({
                     : 'bg-white border-[#E2D9CC] text-[#2C2622]'
                 }`}
               >
-                {COMMON_CURRENCIES.map((c) => (
+                {CURRENCY_OPTIONS.map((c) => (
                   <option key={c.code} value={c.code}>
                     {c.code} ({c.symbol})
                   </option>
@@ -211,7 +222,7 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({
           <div className="space-y-2">
             <label className="text-xs font-medium opacity-80">消費分類</label>
             <div className="grid grid-cols-4 gap-2">
-              {EXPENSE_CATEGORIES.map((cat) => {
+              {EXPENSE_CATEGORIES.map((cat: any) => {
                 const isSelected = category === cat.id;
                 return (
                   <button
@@ -260,7 +271,7 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({
                   >
                     <span
                       className="w-2.5 h-2.5 rounded-full"
-                      style={{ backgroundColor: p.avatarColor }}
+                      style={{ backgroundColor: p.avatarColor || '#4A7C59' }}
                     />
                     <span>{p.name}</span>
                   </button>
@@ -310,7 +321,7 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({
                     : 'bg-white border-[#E2D9CC] text-[#2C2622]'
                 }`}
               >
-                {PAYMENT_METHODS.map((m) => (
+                {PAYMENT_METHODS.map((m: any) => (
                   <option key={m.id} value={m.id}>
                     {m.icon} {m.name}
                   </option>
