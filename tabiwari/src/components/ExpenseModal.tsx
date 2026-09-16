@@ -152,7 +152,7 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({
         {/* Modal Body */}
         <div className="p-6 overflow-y-auto space-y-5">
           
-          {/* 金額與幣別 (徹底移除框內文字重疊) */}
+          {/* 金額與幣別 */}
           <div className="space-y-2">
             <label className="text-xs font-medium opacity-80">
               消費金額 ({currency} {currentCurrencyInfo.symbol})
