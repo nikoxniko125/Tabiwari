@@ -1,11 +1,9 @@
 import React from 'react';
 import { 
-  X, Calendar, Clock, MapPin, CreditCard, DollarSign, 
-  Users, Edit3, Trash2, Tag, FileText 
+  X, Calendar, MapPin, Users, Edit3, Trash2, FileText 
 } from 'lucide-react';
 import { ExpenseItem, Trip } from '../types';
 import { EXPENSE_CATEGORIES, PAYMENT_METHODS, getCurrencyInfo } from '../utils/expenseConstants';
-import { getParticipantColor } from '../utils/participantUtils';
 
 interface ExpenseDetailModalProps {
   isOpen: boolean;
@@ -30,8 +28,11 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({
 
   const participants = trip.participants || [];
   const baseCurrency = trip.baseCurrency || 'HKD';
-  const categoryMeta = EXPENSE_CATEGORIES[expense.category] || EXPENSE_CATEGORIES.other;
-  const paymentMethodInfo = PAYMENT_METHODS[expense.paymentMethod] || PAYMENT_METHODS.credit_card;
+  
+  // 安全尋找對應分類與支付方式
+  const categoryMeta = EXPENSE_CATEGORIES.find((c) => c.id === expense.category) || EXPENSE_CATEGORIES[0];
+  const paymentMethodInfo = PAYMENT_METHODS.find((p) => p.id === expense.paymentMethod) || PAYMENT_METHODS[0];
+  
   const currInfo = getCurrencyInfo(expense.currency);
   const baseCurrInfo = getCurrencyInfo(baseCurrency);
 
@@ -56,13 +57,11 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({
         }`}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header with category color bar */}
+        {/* Header */}
         <div
-          className="p-6 border-b flex items-start justify-between relative"
-          style={{
-            backgroundColor: isDark ? categoryMeta.bgColorDark : categoryMeta.bgColorLight,
-            borderColor: isDark ? '#3C352E' : categoryMeta.borderColorLight,
-          }}
+          className={`p-6 border-b flex items-start justify-between relative ${
+            isDark ? 'bg-[#2A2521] border-[#3C352E]' : 'bg-[#FAF5EE] border-[#E8E1D5]'
+          }`}
         >
           <div className="flex items-start gap-3">
             <span className="text-3xl p-2 rounded-2xl bg-white/40 dark:bg-black/20 shadow-2xs">
@@ -71,10 +70,10 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({
             <div>
               <div className="flex flex-wrap items-center gap-2 mb-1">
                 <span className="text-xs px-2.5 py-0.5 rounded-full font-medium bg-white/70 dark:bg-black/30">
-                  {categoryMeta.name} · {expense.subcategory}
+                  {categoryMeta.name} {expense.subcategory ? `· ${expense.subcategory}` : ''}
                 </span>
                 <span className="text-xs px-2 py-0.5 rounded-full bg-white/50 dark:bg-black/20 opacity-80">
-                  {paymentMethodInfo.icon} {paymentMethodInfo.label}
+                  {paymentMethodInfo.icon} {paymentMethodInfo.name}
                 </span>
               </div>
               <h2 className="text-xl font-mincho font-semibold leading-snug">
@@ -111,7 +110,7 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({
               <div className="text-right">
                 <p className="text-xs opacity-60">折合基準貨幣 (1:{expense.exchangeRate})</p>
                 <p className="text-lg font-semibold font-mono text-[#8C6E54] dark:text-[#D4A373]">
-                  {baseCurrInfo.symbol} {expense.convertedAmount.toLocaleString()} {baseCurrency}
+                  {baseCurrInfo.symbol} {(expense.convertedAmount || (expense.amount * expense.exchangeRate)).toLocaleString()} {baseCurrency}
                 </p>
               </div>
             )}
@@ -128,11 +127,11 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({
               <div className="flex items-center gap-2">
                 <div
                   className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[11px] font-medium"
-                  style={{ backgroundColor: getParticipantColor(payer) }}
+                  style={{ backgroundColor: payer.avatarColor || '#4A7C59' }}
                 >
-                  {(payer?.name || '旅').charAt(0)}
+                  {(payer.name || '旅').charAt(0)}
                 </div>
-                <span className="font-semibold text-sm truncate">{payer?.name || '未知成員'}</span>
+                <span className="font-semibold text-sm truncate">{payer.name}</span>
               </div>
             </div>
 
@@ -172,7 +171,7 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({
             </div>
           )}
 
-          {/* Split Breakdown: 邊個用咗幾多錢 */}
+          {/* Split Breakdown */}
           <div
             className={`p-4 rounded-2xl border space-y-3 ${
               isDark ? 'bg-[#2A2521] border-[#3D352D]' : 'bg-[#FFFFFF] border-[#E8E1D5]'
@@ -193,12 +192,11 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({
             </div>
 
             <div className="space-y-2">
-              {participants.map((p, pIdx) => {
+              {participants.map((p) => {
                 const shareAmount = expense.splitDetails?.[p.id] ?? 0;
                 const isPayer = p.id === expense.payerId;
-                const percent = expense.convertedAmount > 0 
-                  ? Math.round((shareAmount / expense.convertedAmount) * 100) 
-                  : 0;
+                const totalAmt = expense.convertedAmount || (expense.amount * expense.exchangeRate);
+                const percent = totalAmt > 0 ? Math.round((shareAmount / totalAmt) * 100) : 0;
 
                 return (
                   <div
@@ -214,7 +212,7 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({
                     <div className="flex items-center gap-2.5">
                       <div
                         className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[11px]"
-                        style={{ backgroundColor: getParticipantColor(p, pIdx) }}
+                        style={{ backgroundColor: p.avatarColor || '#4A7C59' }}
                       >
                         {(p.name || '旅').charAt(0)}
                       </div>
@@ -245,20 +243,6 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({
               })}
             </div>
           </div>
-
-          {/* Receipt Photo Preview if present */}
-          {expense.receiptPhoto && (
-            <div>
-              <p className="text-xs opacity-60 mb-2">收據照片憑單</p>
-              <div className="rounded-2xl overflow-hidden border border-[#E8E1D5] dark:border-[#3D352D] max-h-64 bg-black/5">
-                <img
-                  src={expense.receiptPhoto}
-                  alt="Receipt"
-                  className="w-full h-full object-contain"
-                />
-              </div>
-            </div>
-          )}
 
           {/* Action Buttons */}
           <div className="flex items-center justify-between pt-2 border-t border-[#EBE4D8] dark:border-[#38322B]">
