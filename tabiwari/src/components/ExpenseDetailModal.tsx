@@ -1,10 +1,9 @@
 import React from 'react';
 import { 
-  X, Calendar, CreditCard, Users, Edit3, Trash2
+  X, Calendar, CreditCard, Users, Edit3, Trash2 
 } from 'lucide-react';
 import { ExpenseItem, Trip } from '../types';
 import { EXPENSE_CATEGORIES, PAYMENT_METHODS, getCurrencyInfo } from '../utils/expenseConstants';
-import { getParticipantColor } from '../utils/participantUtils';
 
 interface ExpenseDetailModalProps {
   isOpen: boolean;
@@ -97,7 +96,7 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({
               <div className="flex items-center gap-1.5">
                 <span
                   className="w-3 h-3 rounded-full"
-                  style={{ backgroundColor: payer?.avatarColor || getParticipantColor(payer?.name || '') }}
+                  style={{ backgroundColor: payer?.avatarColor || '#4A7C59' }}
                 />
                 <span className="text-xs font-semibold">{payer?.name || '未知成員'}</span>
               </div>
@@ -129,7 +128,7 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({
                 >
                   <span
                     className="w-2 h-2 rounded-full"
-                    style={{ backgroundColor: p.avatarColor || getParticipantColor(p.name) }}
+                    style={{ backgroundColor: p.avatarColor || '#4A7C59' }}
                   />
                   {p.name}
                 </span>
