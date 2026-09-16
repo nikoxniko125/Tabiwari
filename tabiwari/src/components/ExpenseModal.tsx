@@ -580,7 +580,7 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({
                     placeholder="0"
                     value={amountStr}
                     onChange={(e) => setAmountStr(e.target.value)}
-                    className={`w-full pl-16 pr-3.5 py-2 rounded-xl text-base font-semibold border focus:outline-none ${
+                    className={`w-full pl-12 pr-3.5 py-2 rounded-xl text-base font-semibold border focus:outline-none ${
                       isDark
                         ? 'bg-[#322C27] border-[#4A4137] text-[#EDE7DF] focus:border-[#D4A373]'
                         : 'bg-[#FAF8F3] border-[#DDD5C7] text-[#2C2622] focus:border-[#8C6E54]'
