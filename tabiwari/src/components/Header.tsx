@@ -1,6 +1,6 @@
 import React from 'react';
 import { 
-  Plus, Upload, ArrowLeft, RefreshCw, Sun, Moon, Palette
+  Plus, Upload, ArrowLeft, TrendingUp, Sun, Moon
 } from 'lucide-react';
 import { Trip, AppBranding } from '../types';
 import { ThemeMode } from '../utils/storage';
@@ -65,7 +65,6 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={onHomeClick}
             className="flex items-center gap-2.5 cursor-pointer group select-none"
           >
-            {/* 改為預設讀取 /apple-touch-icon.png 圖片 */}
             <img 
               src="/apple-touch-icon.png?v=2" 
               alt="旅割 Logo" 
@@ -84,19 +83,19 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Right: Actions & Tools */}
         <div className="flex items-center gap-2">
-          {/* 匯率面板 */}
+          {/* 匯率面板按鈕：已換回趨勢箭頭圖標，並強制在手機上顯示「匯率」文字 */}
           <button
             id="header-live-rates-btn"
             onClick={onOpenLiveRates}
-            className={`p-2 rounded-xl border text-xs font-medium flex items-center gap-1.5 transition-colors ${
+            className={`px-3 py-2 rounded-xl border text-xs font-medium flex items-center gap-1.5 transition-colors ${
               isDark
                 ? 'bg-[#25211E] border-[#3D352D] text-[#D4A373] hover:bg-[#332C28]'
                 : 'bg-white border-[#E5DDCF] text-[#8C6E54] hover:bg-[#F5EFE6]'
             }`}
             title="即時匯率看板"
           >
-            <RefreshCw className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">匯率</span>
+            <TrendingUp className="w-3.5 h-3.5 text-[#D4A373]" />
+            <span className="inline">匯率</span>
           </button>
 
           {/* 新增旅程按鈕 */}
