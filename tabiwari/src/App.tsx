@@ -6,7 +6,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Compass, Plus, Search, Filter, Calendar, MapPin, Sparkles, 
-  ReceiptText, Users, Download, Upload, ArrowRight, Sun, Moon, TrendingUp, Palette
+  ReceiptText, Users, Download, Upload, ArrowRight, Sun, Moon, TrendingUp
 } from 'lucide-react';
 import { 
   Trip, ExpenseItem, PackingItem, TripMemo, TripSeason, TripStatus, AppBranding 
@@ -35,18 +35,16 @@ export default function App() {
   const [theme, setTheme] = useState<ThemeMode>(() => {
     const saved = loadTheme();
     if (saved) return saved;
-    // 跟隨手機系統設定 (Dark / Light)
     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
       return 'dark';
     }
     return 'light';
   });
 
-  // 2. 監聽手機系統 Theme 的變化 (例如手機設定了日落自動轉深色)
+  // 2. 監聽手機系統 Theme 的變化
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleChange = (e: MediaQueryListEvent) => {
-      // 只有在用戶未手動強制設定過偏好時才自動隨系統轉變
       if (!localStorage.getItem('tabi_wari_theme')) {
         setTheme(e.matches ? 'dark' : 'light');
       }
@@ -67,15 +65,13 @@ export default function App() {
     };
   }, []);
 
-  // Branding customization (Custom Logo, Icon, and App Title)
+  // Branding customization
   const [branding, setBranding] = useState<AppBranding>(() => loadAppBranding());
 
-  // Apply custom branding to document title & iOS Apple Touch Icon
   useEffect(() => {
     applyAppBrandingToDocument(branding);
   }, [branding]);
 
-  // Apply dark mode class to document element
   useEffect(() => {
     saveTheme(theme);
     if (theme === 'dark') {
@@ -93,8 +89,6 @@ export default function App() {
 
   // Trips collection state
   const [trips, setTrips] = useState<Trip[]>(() => loadTrips());
-  
-  // Persistent active trip: restoring state when returning so edits are never lost
   const [activeTripId, setActiveTripIdState] = useState<string | null>(() => loadActiveTripId());
 
   const setActiveTripId = (id: string | null) => {
@@ -129,7 +123,6 @@ export default function App() {
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving'>('saved');
   const [lastSavedTime, setLastSavedTime] = useState<string>('');
 
-  // Save trips whenever updated (with visual save status)
   useEffect(() => {
     setSaveStatus('saving');
     saveTrips(trips);
@@ -142,13 +135,11 @@ export default function App() {
     return () => clearTimeout(timer);
   }, [trips]);
 
-  // Active Trip Object
   const currentTrip = useMemo(() => {
     if (!activeTripId) return null;
     return trips.find((t) => t.id === activeTripId) || null;
   }, [trips, activeTripId]);
 
-  // Filtered and automatically sorted trips for main list
   const filteredTrips = useMemo(() => {
     const today = new Date().toISOString().split('T')[0];
 
@@ -175,27 +166,22 @@ export default function App() {
       const aEnded = isTripEnded(a);
       const bEnded = isTripEnded(b);
 
-      // 1. 已結束的行程自動跌至最後
       if (!aEnded && bEnded) return -1;
       if (aEnded && !bEnded) return 1;
 
-      // 2. 未結束行程（進行中與未來即將到來的行程）
       if (!aEnded && !bEnded) {
         const aOngoing = a.startDate <= today && a.endDate >= today;
         const bOngoing = b.startDate <= today && b.endDate >= today;
 
-        // 正在進行中的旅程置於最頂部
         if (aOngoing && !bOngoing) return -1;
         if (!aOngoing && bOngoing) return 1;
 
-        // 由就快到至比較遠的行程由上往下排（出發日期升序）
         if (a.startDate !== b.startDate) {
           return a.startDate.localeCompare(b.startDate);
         }
         return a.endDate.localeCompare(b.endDate);
       }
 
-      // 3. 兩者皆為已結束行程：結束日期較近的排在結束區塊前端
       if (a.endDate !== b.endDate) {
         return b.endDate.localeCompare(a.endDate);
       }
@@ -203,7 +189,6 @@ export default function App() {
     });
   }, [trips, searchQuery, seasonFilter, statusFilter]);
 
-  // 分離未結束（進行中 / 未來即將到來）與已結束的旅程
   const { upcomingTrips, endedTrips } = useMemo(() => {
     const today = new Date().toISOString().split('T')[0];
     const isTripEnded = (t: Trip) => t.status === 'completed' || (Boolean(t.endDate) && t.endDate < today);
@@ -222,7 +207,6 @@ export default function App() {
     return { upcomingTrips: upcoming, endedTrips: ended };
   }, [filteredTrips]);
 
-  // Handlers for Trip
   const handleCreateOrUpdateTrip = (tripData: Partial<Trip>) => {
     const now = new Date().toISOString();
     if (editingTrip) {
@@ -280,7 +264,6 @@ export default function App() {
     }
   };
 
-  // Handlers for Expenses (記帳 & 分帳)
   const handleSaveExpense = (expenseData: Partial<ExpenseItem>) => {
     if (!activeTripId) return;
 
@@ -352,7 +335,6 @@ export default function App() {
     setIsExpenseModalOpen(true);
   };
 
-  // Handlers for Packing List
   const handleAddPackingItem = (item: Omit<PackingItem, 'id'>) => {
     if (!activeTripId) return;
     const newItem: PackingItem = {
@@ -398,7 +380,6 @@ export default function App() {
     );
   };
 
-  // Handlers for Memos
   const handleSaveMemo = (memoData: Omit<TripMemo, 'id'>) => {
     if (!activeTripId) return;
     const newMemo: TripMemo = {
@@ -434,7 +415,7 @@ export default function App() {
       isDark ? 'bg-[#191715] text-[#EDE7DF]' : 'bg-[#FAF8F3] text-[#2C2622]'
     }`}>
       
-      {/* Universal Top Header with Theme Switcher & Backup */}
+      {/* Top Header */}
       <Header
         trips={trips}
         theme={theme}
@@ -456,7 +437,6 @@ export default function App() {
       {/* Main Content Area */}
       <main className="flex-1 w-full pb-16">
         {currentTrip ? (
-          /* Single Trip Detailed Expense & Split View */
           <TripDetailView
             trip={currentTrip}
             onBack={() => setActiveTripId(null)}
@@ -485,7 +465,6 @@ export default function App() {
             isDark={isDark}
           />
         ) : (
-          /* Trips Directory View */
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 space-y-6">
             
             {/* Japanese Aesthetic Welcoming Banner */}
@@ -519,7 +498,6 @@ export default function App() {
                 </p>
               </div>
 
-              {/* Banner 右側僅保留建立新旅行按鈕 */}
               <div className="relative z-10 flex flex-wrap items-center gap-2.5 shrink-0">
                 <button
                   id="welcome-new-trip-btn"
@@ -547,7 +525,6 @@ export default function App() {
                   : 'bg-[#FAF8F3] border-[#EAE3D8]'
               }`}
             >
-              {/* Search input */}
               <div className="relative flex-1 max-w-md">
                 <Search className="w-4 h-4 absolute left-3 top-2.5 opacity-40" />
                 <input
@@ -564,9 +541,7 @@ export default function App() {
                 />
               </div>
 
-              {/* Season & Status Filters */}
               <div className="flex flex-wrap items-center gap-2 text-xs">
-                {/* Season pills */}
                 <div
                   className={`flex items-center gap-1 p-1 rounded-xl border ${
                     isDark ? 'bg-[#2A2521] border-[#433B33]' : 'bg-white border-[#E2D9CC]'
@@ -631,7 +606,6 @@ export default function App() {
                   </button>
                 </div>
 
-                {/* Status selector */}
                 <select
                   id="filter-status-select"
                   value={statusFilter}
@@ -688,7 +662,6 @@ export default function App() {
               </div>
             ) : upcomingTrips.length > 0 && endedTrips.length > 0 ? (
               <div className="space-y-9">
-                {/* Upcoming / Ongoing Section */}
                 <div className="space-y-4">
                   <div className="flex items-center justify-between pb-1">
                     <div className="flex items-center gap-2">
@@ -722,7 +695,6 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* Ended Section - Dropped to bottom */}
                 <div className="space-y-4 pt-6 border-t border-dashed border-[#DDD5C7] dark:border-[#38312A]">
                   <div className="flex items-center justify-between pb-1">
                     <div className="flex items-center gap-2">
@@ -779,7 +751,7 @@ export default function App() {
         )}
       </main>
 
-      {/* Footer：左邊備份/匯入，右邊【自訂圖示(純圖標)】與【切換模式】 */}
+      {/* Footer：已完美移除調色盤按鈕 */}
       <footer
         className={`w-full border-t py-6 transition-colors ${
           isDark
@@ -789,7 +761,6 @@ export default function App() {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
           
-          {/* 中間： App 標題與說明 */}
           <div className="text-center space-y-1">
             <p className="font-mincho tracking-wider text-xs">
               旅割 · TABI-WARI · 旅行記帳與分帳
@@ -799,7 +770,6 @@ export default function App() {
             </p>
           </div>
 
-          {/* 底欄左右排列 */}
           <div className="flex flex-row items-center justify-between gap-2 pt-2 border-t border-dashed border-[#E5DDCF] dark:border-[#2D2822]">
             {/* 左下角：備份/匯入 */}
             <button
@@ -815,23 +785,8 @@ export default function App() {
               <span>備份/匯入 (JSON)</span>
             </button>
 
-            {/* 右下角：自訂 Logo 圖標 + 切換深淺模式 */}
+            {/* 右下角：僅保留切換深淺模式按鈕 */}
             <div className="flex items-center gap-2">
-              {/* 自訂 Logo 圖示按鈕（純圖標無文字） */}
-              <button
-                id="footer-custom-logo-btn"
-                onClick={() => setIsCustomLogoModalOpen(true)}
-                title="自訂專屬 Logo 與名稱"
-                className={`p-2 rounded-xl border transition-colors ${
-                  isDark
-                    ? 'bg-[#2A2521] border-[#3D352D] text-[#D4A373] hover:bg-[#352E28]'
-                    : 'bg-[#FFFFFF] border-[#E3D8C8] text-[#8C6E54] hover:bg-[#F5EFE6]'
-                }`}
-              >
-                <Palette className="w-3.5 h-3.5" />
-              </button>
-
-              {/* 切換模式按鈕（支援手動點擊切換） */}
               <button
                 id="footer-theme-toggle-btn"
                 onClick={toggleTheme}
@@ -842,13 +797,9 @@ export default function App() {
                 }`}
               >
                 {isDark ? (
-                  <>
-                    <Sun className="w-3.5 h-3.5 text-[#F4C430]" />
-                  </>
+                  <Sun className="w-3.5 h-3.5 text-[#F4C430]" />
                 ) : (
-                  <>
-                    <Moon className="w-3.5 h-3.5 text-[#8C6E54]" />
-                  </>
+                  <Moon className="w-3.5 h-3.5 text-[#8C6E54]" />
                 )}
               </button>
             </div>
@@ -858,7 +809,6 @@ export default function App() {
       </footer>
 
       {/* MODALS */}
-      {/* 1. Trip Modal (New / Edit Trip) */}
       <TripModal
         isOpen={isTripModalOpen}
         onClose={() => {
@@ -870,7 +820,6 @@ export default function App() {
         isDark={isDark}
       />
 
-      {/* 2. Expense Modal (Add / Edit Expense) */}
       {currentTrip && (
         <ExpenseModal
           isOpen={isExpenseModalOpen}
@@ -885,7 +834,6 @@ export default function App() {
         />
       )}
 
-      {/* 3. Expense Detail Modal (Detailed split of single item) */}
       {currentTrip && (
         <ExpenseDetailModal
           isOpen={!!selectedExpenseForDetail}
@@ -902,7 +850,6 @@ export default function App() {
         />
       )}
 
-      {/* 4. Settlement Share Modal (Export / Copy WhatsApp/LINE summary) */}
       {currentTrip && (
         <SettlementShareModal
           isOpen={isSettlementShareOpen}
@@ -912,7 +859,6 @@ export default function App() {
         />
       )}
 
-      {/* 5. Memo Modal */}
       {currentTrip && (
         <MemoModal
           isOpen={isMemoModalOpen}
@@ -923,7 +869,6 @@ export default function App() {
         />
       )}
 
-      {/* 6. Backup & Restore Modal */}
       <BackupModal
         isOpen={isBackupModalOpen}
         onClose={() => setIsBackupModalOpen(false)}
@@ -939,7 +884,6 @@ export default function App() {
         isDark={isDark}
       />
 
-      {/* 7. Live Foreign Exchange Rates Board Modal */}
       <LiveRateModal
         isOpen={isLiveRateModalOpen}
         onClose={() => setIsLiveRateModalOpen(false)}
@@ -947,7 +891,6 @@ export default function App() {
         isDark={isDark}
       />
 
-      {/* 8. Custom App Logo & Branding Modal */}
       <CustomLogoModal
         isOpen={isCustomLogoModalOpen}
         onClose={() => setIsCustomLogoModalOpen(false)}
