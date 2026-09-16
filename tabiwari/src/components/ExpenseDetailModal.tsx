@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { X, Check, Calendar, Clock, MapPin, FileText, Camera } from 'lucide-react';
+import { X, Check } from 'lucide-react';
 import { Trip, ExpenseItem, ExpenseCategory, SplitType, PaymentMethod } from '../types';
 import { 
   EXPENSE_CATEGORIES, 
   COMMON_CURRENCIES, 
   PAYMENT_METHODS, 
-  SPLIT_TYPES,
   getCurrencyInfo 
 } from '../utils/expenseConstants';
 
@@ -153,31 +152,25 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({
         {/* Modal Body */}
         <div className="p-6 overflow-y-auto space-y-5">
           
-          {/* 金額與幣別 (完美解決重疊問題) */}
+          {/* 金額與幣別 (徹底移除框內文字重疊) */}
           <div className="space-y-2">
-            <label className="text-xs font-medium opacity-80">消費金額 ({currency})</label>
+            <label className="text-xs font-medium opacity-80">
+              消費金額 ({currency} {currentCurrencyInfo.symbol})
+            </label>
             <div className="flex gap-2">
-              <div className="relative flex-1">
-                {/* 幣別符號標籤 (固定在左側) */}
-                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-semibold opacity-60 pointer-events-none select-none">
-                  {currentCurrencyInfo.symbol}
-                </span>
-                
-                {/* 輸入框 (使用 pl-16 預留足夠空隙，避免數字重疊) */}
-                <input
-                  type="number"
-                  step="any"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  placeholder="0.00"
-                  autoFocus
-                  className={`w-full pl-16 pr-4 py-3 rounded-2xl border text-lg font-semibold focus:outline-none transition-colors ${
-                    isDark
-                      ? 'bg-[#2A2521] border-[#433B33] text-[#EDE7DF] focus:border-[#D4A373]'
-                      : 'bg-white border-[#E2D9CC] text-[#2C2622] focus:border-[#8C6E54]'
-                  }`}
-                />
-              </div>
+              <input
+                type="number"
+                step="any"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                placeholder="0.00"
+                autoFocus
+                className={`flex-1 px-4 py-3 rounded-2xl border text-lg font-semibold focus:outline-none transition-colors ${
+                  isDark
+                    ? 'bg-[#2A2521] border-[#433B33] text-[#EDE7DF] focus:border-[#D4A373]'
+                    : 'bg-white border-[#E2D9CC] text-[#2C2622] focus:border-[#8C6E54]'
+                }`}
+              />
 
               {/* 幣別切換 */}
               <select
