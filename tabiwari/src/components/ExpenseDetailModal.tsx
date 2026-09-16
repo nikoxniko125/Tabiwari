@@ -1,7 +1,6 @@
 import React from 'react';
 import { 
-  X, Calendar, Clock, MapPin, CreditCard, DollarSign, 
-  Users, Edit3, Trash2, Tag, FileText 
+  X, Calendar, CreditCard, Users, Edit3, Trash2
 } from 'lucide-react';
 import { ExpenseItem, Trip } from '../types';
 import { EXPENSE_CATEGORIES, PAYMENT_METHODS, getCurrencyInfo } from '../utils/expenseConstants';
@@ -151,7 +150,7 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({
           </div>
         </div>
 
-        {/* Modal Footer (按鈕操作區) */}
+        {/* Modal Footer */}
         <div className="p-4 border-t border-stone-200 dark:border-stone-800 flex items-center justify-between gap-2 shrink-0">
           <button
             onClick={() => {
