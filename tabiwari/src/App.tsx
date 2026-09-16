@@ -467,15 +467,15 @@ export default function App() {
         ) : (
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 space-y-6">
             
-            {/* Japanese Aesthetic Welcoming Banner */}
+            {/* Japanese Aesthetic Welcoming Banner (已移除右側重複的建立按鈕) */}
             <div
-              className={`rounded-3xl border p-6 sm:p-8 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden transition-colors ${
+              className={`rounded-3xl border p-6 sm:p-8 shadow-xs relative overflow-hidden transition-colors ${
                 isDark
                   ? 'bg-[#23201D] border-[#38322B] text-[#EDE7DF]'
                   : 'bg-[#FFFFFF] border-[#EAE3D8] text-[#2C2622]'
               }`}
             >
-              <div className="relative z-10 max-w-2xl">
+              <div className="relative z-10 max-w-3xl">
                 <div
                   className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium mb-3 border ${
                     isDark
@@ -496,24 +496,6 @@ export default function App() {
                 >
                   支援多國幣別自動換算（日圓 JPY、港幣 HKD、台幣 TWD 等）、細緻分類（酒店房費、餐飲居酒屋、交通新幹線），並自動計算每人墊付與應攤差額，一鍵生成最少轉帳清算明細。
                 </p>
-              </div>
-
-              <div className="relative z-10 flex flex-wrap items-center gap-2.5 shrink-0">
-                <button
-                  id="welcome-new-trip-btn"
-                  onClick={() => {
-                    setEditingTrip(null);
-                    setIsTripModalOpen(true);
-                  }}
-                  className={`inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-2xl text-xs sm:text-sm font-medium transition-all shadow-xs ${
-                    isDark
-                      ? 'bg-[#D4A373] text-[#1A1816] hover:bg-[#C29060]'
-                      : 'bg-[#2C2622] text-[#FAF8F3] hover:bg-[#433D39]'
-                  }`}
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>建立新旅行記帳本</span>
-                </button>
               </div>
             </div>
 
@@ -751,7 +733,7 @@ export default function App() {
         )}
       </main>
 
-      {/* Footer：已完美移除調色盤按鈕 */}
+      {/* Footer */}
       <footer
         className={`w-full border-t py-6 transition-colors ${
           isDark
@@ -785,7 +767,7 @@ export default function App() {
               <span>備份/匯入 (JSON)</span>
             </button>
 
-            {/* 右下角：僅保留切換深淺模式按鈕 */}
+            {/* 右下角：切換深淺模式按鈕 */}
             <div className="flex items-center gap-2">
               <button
                 id="footer-theme-toggle-btn"
