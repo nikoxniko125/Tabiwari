@@ -224,7 +224,7 @@ export const TripDetailView: React.FC<TripDetailViewProps> = ({
               </button>
             )}
 
-            {/* iPhone Duo 雙欄 / 外屏單欄切換按鈕 */}
+            {/* 雙欄 / 單欄切換按鈕 */}
             <button
               id="trip-duo-toggle-header-btn"
               onClick={toggleDuoSplitMode}
@@ -233,10 +233,10 @@ export const TripDetailView: React.FC<TripDetailViewProps> = ({
                   ? 'bg-[#D4A373] text-[#1A1816] border-[#D4A373] shadow-md font-semibold'
                   : 'bg-black/40 hover:bg-black/60 text-white border-white/10'
               }`}
-              title="切換 iPhone Duo 7.6吋展開雙欄 / 5.4吋外屏單欄模式"
+              title="切換雙欄 / 單欄模式"
             >
               {isDuoSplitMode ? <BookOpen className="w-3.5 h-3.5" /> : <Smartphone className="w-3.5 h-3.5" />}
-              <span>{isDuoSplitMode ? 'Duo 雙欄' : '單欄模式'}</span>
+              <span>{isDuoSplitMode ? '雙欄模式' : '單欄模式'}</span>
             </button>
 
             <button
@@ -289,7 +289,7 @@ export const TripDetailView: React.FC<TripDetailViewProps> = ({
             {isDuoSplitMode && (
               <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-xs font-medium bg-[#81B29A] text-[#1A1816] shadow-xs">
                 <BookOpen className="w-3 h-3" />
-                <span>iPhone Duo 7.6" 雙欄並排</span>
+                <span>雙欄多工並排</span>
               </span>
             )}
           </div>
@@ -1367,13 +1367,14 @@ export const TripDetailView: React.FC<TripDetailViewProps> = ({
         </>
       )}
 
-      {/* 5. iPhone Duo 專屬右側拇指快捷懸浮選單 */}
+      {/* 5. 側邊拇指快捷懸浮選單 (含右側 thumb 返回按鈕) */}
       <DuoThumbDock
         isDuoSplitMode={isDuoSplitMode}
         onToggleDuoMode={toggleDuoSplitMode}
         onAddExpense={onAddExpense}
         onOpenSettlementShare={onOpenSettlementShare}
         onOpenLiveRates={onOpenLiveRates}
+        onBack={onBack}
         isDark={isDark}
       />
     </div>

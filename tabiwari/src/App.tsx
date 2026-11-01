@@ -6,7 +6,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Compass, Plus, Search, Filter, Calendar, MapPin, Sparkles, 
-  ReceiptText, Users, Download, Upload, ArrowRight, Sun, Moon, TrendingUp, Palette
+  ReceiptText, Users, Download, Upload, ArrowRight, ArrowLeft, Sun, Moon, TrendingUp, Palette
 } from 'lucide-react';
 import { 
   Trip, ExpenseItem, PackingItem, TripMemo, TripSeason, TripStatus, AppBranding 
@@ -75,13 +75,22 @@ export default function App() {
     applyAppBrandingToDocument(branding);
   }, [branding]);
 
-  // Apply dark mode class to document element
+  // Apply dark mode class to document element & sync viewport background & theme-color
   useEffect(() => {
     saveTheme(theme);
+    const bgCol = theme === 'dark' ? '#191715' : '#FAF8F3';
     if (theme === 'dark') {
       document.documentElement.classList.add('dark');
+      document.body.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
+      document.body.classList.remove('dark');
+    }
+    document.documentElement.style.backgroundColor = bgCol;
+    document.body.style.backgroundColor = bgCol;
+    const metaTheme = document.querySelector('meta[name="theme-color"]');
+    if (metaTheme) {
+      metaTheme.setAttribute('content', bgCol);
     }
   }, [theme]);
 
@@ -430,10 +439,28 @@ export default function App() {
   };
 
   return (
-    <div className={`min-h-screen flex flex-col font-sans safe-left safe-right transition-colors duration-200 ${
+    <div className={`min-h-screen flex flex-col font-sans transition-colors duration-200 ${
       isDark ? 'bg-[#191715] text-[#EDE7DF]' : 'bg-[#FAF8F3] text-[#2C2622]'
     }`}>
       
+      {/* 旅程內右側快速返回箭咀按鈕 (在右側邊緣，方便拇指隨時單手點擊返回旅記列表) */}
+      {currentTrip && (
+        <button
+          id="global-right-side-back-btn"
+          onClick={() => setActiveTripId(null)}
+          className={`fixed right-3 sm:right-5 top-20 z-40 inline-flex items-center gap-1.5 px-3 py-2 rounded-2xl shadow-xl backdrop-blur-md border transition-all hover:scale-105 active:scale-95 ${
+            isDark
+              ? 'bg-[#23201D]/95 border-[#433B33] text-[#EDE7DF] hover:bg-[#2F2923] hover:text-[#D4A373]'
+              : 'bg-white/95 border-[#E5DACD] text-[#2C2622] hover:bg-[#FAF8F3] hover:text-[#8C6E54]'
+          }`}
+          title="返回旅記列表"
+          aria-label="返回旅記列表"
+        >
+          <ArrowLeft className="w-4 h-4 text-[#D4A373] dark:text-[#D4A373]" />
+          <span className="text-xs font-semibold">返回</span>
+        </button>
+      )}
+
       {/* Universal Top Header with Theme Switcher & Backup */}
       <Header
         trips={trips}
@@ -796,11 +823,11 @@ export default function App() {
                 旅割 · TABI-WARI · 旅行記帳與分帳
               </p>
               <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#81B29A]/15 text-[#3D7A64] dark:text-[#81B29A] font-medium border border-[#81B29A]/30">
-                v2.1 · iPhone Duo 適配版
+                v2.1
               </span>
             </div>
             <p className="text-[11px] opacity-70">
-              支援 iPhone Duo 雙屏摺疊與單手側邊化介面、多人旅行分帳、多國貨幣換算 · 資料完整儲存於本機瀏覽器
+              支援多欄多工佈局與單手側邊化介面、多人旅行分帳、多國貨幣換算 · 資料完整儲存於本機瀏覽器
             </p>
           </div>
 

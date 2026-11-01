@@ -167,9 +167,9 @@ export const BackupModal: React.FC<BackupModalProps> = ({
             </h3>
             <span
               className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#81B29A]/15 text-[#3D7A64] dark:text-[#81B29A] font-semibold border border-[#81B29A]/30"
-              title="iPhone Duo 雙屏適配版"
+              title="版本 2.1"
             >
-              v2.1 Duo
+              v2.1
             </span>
           </div>
           <button

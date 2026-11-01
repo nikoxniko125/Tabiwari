@@ -2,7 +2,7 @@ import React from 'react';
 import { 
   Compass, Plus, Users, ReceiptText, 
   TrendingUp, Palette, Plane, Camera, Mountain, Coffee, Luggage, Coins,
-  Sliders
+  Sliders, ArrowLeft
 } from 'lucide-react';
 import { Trip, AppBranding } from '../types';
 import { ThemeMode } from '../utils/storage';
@@ -111,7 +111,7 @@ export const Header: React.FC<HeaderProps> = ({
               title="返回旅記首頁"
             >
               <div
-                className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all shadow-2xs overflow-hidden ${
+                className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all shadow-2xs overflow-hidden shrink-0 ${
                   isDark
                     ? 'bg-[#2E2924] border border-[#433B33] text-[#D4A373]'
                     : 'bg-[#F2ECE1] border border-[#E3D8C8] text-[#8C6E54] group-hover:bg-[#EAE0D0]'
@@ -133,12 +133,25 @@ export const Header: React.FC<HeaderProps> = ({
                   >
                     {appSubtitle}
                   </span>
-                  <span
-                    className="text-[10px] font-mono px-1.5 py-0.5 rounded-md bg-[#81B29A]/15 text-[#3D7A64] dark:text-[#81B29A] font-semibold border border-[#81B29A]/30"
-                    title="iPhone Duo 雙屏摺疊適配版本 2.1"
-                  >
-                    v2.1 Duo
-                  </span>
+                  {!isInsideTrip ? (
+                    <span
+                      className="text-[10px] font-mono px-1.5 py-0.5 rounded-md bg-[#81B29A]/15 text-[#3D7A64] dark:text-[#81B29A] font-semibold border border-[#81B29A]/30"
+                      title="版本 2.1"
+                    >
+                      v2.1
+                    </span>
+                  ) : (
+                    <span
+                      className={`inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-lg border transition-colors ${
+                        isDark
+                          ? 'bg-[#2A2521] border-[#3D352D] text-[#D4A373]'
+                          : 'bg-[#F5EFE6] border-[#E8DFC0] text-[#8C6E54]'
+                      }`}
+                    >
+                      <ArrowLeft className="w-3 h-3" />
+                      <span>返回列表</span>
+                    </span>
+                  )}
                 </div>
                 <p
                   className={`text-xs font-sans tracking-wide hidden sm:block ${

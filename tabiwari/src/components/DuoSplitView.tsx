@@ -88,7 +88,7 @@ export const DuoSplitView: React.FC<DuoSplitViewProps> = ({
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 pb-24 animate-fadeIn">
-      {/* 1. iPhone Duo 頂部多工狀態橫條 */}
+      {/* 1. 雙欄多工狀態橫條 */}
       <div
         className={`p-3.5 mb-5 rounded-2xl border flex flex-wrap items-center justify-between gap-3 shadow-xs transition-colors ${
           isDark ? 'bg-[#23201D] border-[#3C352E]' : 'bg-[#FFFFFF] border-[#E8E1D5]'
@@ -100,9 +100,9 @@ export const DuoSplitView: React.FC<DuoSplitViewProps> = ({
           </span>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-xs sm:text-sm font-semibold">iPhone Duo 雙欄多工視圖</h2>
+              <h2 className="text-xs sm:text-sm font-semibold">雙欄多工視圖</h2>
               <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#81B29A]/15 text-[#3D7A64] dark:text-[#81B29A] font-semibold border border-[#81B29A]/30">
-                7.6" 展開模式
+                並排模式
               </span>
             </div>
             <p className={`text-[11px] ${isDark ? 'text-[#9E9488]' : 'text-[#7D756C]'}`}>
@@ -155,10 +155,10 @@ export const DuoSplitView: React.FC<DuoSplitViewProps> = ({
                 ? 'bg-[#2A2521] border-[#433B33] text-[#EDE7DF] hover:bg-[#352F28]'
                 : 'bg-[#FAF8F3] border-[#DDD5C7] text-[#2C2622] hover:bg-[#F2ECE1]'
             }`}
-            title="切換回 5.4 吋外屏單欄模式"
+            title="切換回單欄模式"
           >
             <Smartphone className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">切換為 5.4" 外屏單欄</span>
+            <span className="hidden sm:inline">切換為單欄模式</span>
           </button>
         </div>
       </div>
