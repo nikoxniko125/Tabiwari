@@ -3,7 +3,8 @@ import {
   ArrowLeft, Calendar, MapPin, Plus, Edit3, Trash2, CheckCircle2, Circle, 
   DollarSign, Sparkles, CheckSquare, Square, Users, Share2, ReceiptText,
   PieChart, Filter, Search, ArrowRightLeft, CreditCard, ChevronRight,
-  Info, ArrowUpRight, ArrowDownLeft, Check, Copy, Tag, Eye, TrendingUp
+  Info, ArrowUpRight, ArrowDownLeft, Check, Copy, Tag, Eye, TrendingUp,
+  BookOpen, Smartphone, ChevronUp, Layers
 } from 'lucide-react';
 import { 
   Trip, ExpenseItem, MainExpenseCategory, Participant, PackingItem, TripMemo 
@@ -12,6 +13,8 @@ import { formatDateRange, calculateDaysBetween, loadActiveTab, saveActiveTab } f
 import { calculateTripExpenseSummary, formatMoney } from '../utils/settlementCalculator';
 import { EXPENSE_CATEGORIES, PAYMENT_METHODS, getCurrencyInfo } from '../utils/expenseConstants';
 import { getParticipantColor } from '../utils/participantUtils';
+import { DuoSplitView } from './DuoSplitView';
+import { DuoThumbDock } from './DuoThumbDock';
 
 interface TripDetailViewProps {
   trip: Trip;
@@ -75,6 +78,38 @@ export const TripDetailView: React.FC<TripDetailViewProps> = ({
 
   // Settlement transfer checklist state (stored in component local state)
   const [settledTransferIds, setSettledTransferIds] = useState<Record<string, boolean>>({});
+
+  // iPhone Duo 雙欄展開模式狀態 (7.6 吋內屏 / iPad / 平板寬屏自適應)
+  const [isDuoSplitMode, setIsDuoSplitMode] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem('tabiki_duo_split_mode');
+      if (saved !== null) return saved === 'true';
+      return typeof window !== 'undefined' && window.innerWidth >= 768;
+    } catch {
+      return false;
+    }
+  });
+
+  const toggleDuoSplitMode = () => {
+    setIsDuoSplitMode((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem('tabiki_duo_split_mode', String(next));
+      } catch (e) {
+        console.error(e);
+      }
+      return next;
+    });
+  };
+
+  // iPhone Duo 右側拇指快捷懸浮選單開合狀態
+  const [isDuoDockOpen, setIsDuoDockOpen] = useState(false);
+
+  // Duo 雙欄模式下，右欄切換 (消費流水 vs 支出分析)
+  const [duoRightPaneTab, setDuoRightPaneTab] = useState<'expenses' | 'analytics'>('expenses');
+
+  // Duo 左欄備忘抽屜展開狀態
+  const [isDuoMemoOpen, setIsDuoMemoOpen] = useState(false);
 
   const days = calculateDaysBetween(trip.startDate, trip.endDate);
   const baseCurrency = trip.baseCurrency || 'HKD';
@@ -189,6 +224,21 @@ export const TripDetailView: React.FC<TripDetailViewProps> = ({
               </button>
             )}
 
+            {/* iPhone Duo 雙欄 / 外屏單欄切換按鈕 */}
+            <button
+              id="trip-duo-toggle-header-btn"
+              onClick={toggleDuoSplitMode}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl backdrop-blur-md text-xs font-medium border transition-all ${
+                isDuoSplitMode
+                  ? 'bg-[#D4A373] text-[#1A1816] border-[#D4A373] shadow-md font-semibold'
+                  : 'bg-black/40 hover:bg-black/60 text-white border-white/10'
+              }`}
+              title="切換 iPhone Duo 7.6吋展開雙欄 / 5.4吋外屏單欄模式"
+            >
+              {isDuoSplitMode ? <BookOpen className="w-3.5 h-3.5" /> : <Smartphone className="w-3.5 h-3.5" />}
+              <span>{isDuoSplitMode ? 'Duo 雙欄' : '單欄模式'}</span>
+            </button>
+
             <button
               id="trip-share-btn"
               onClick={onOpenSettlementShare}
@@ -236,6 +286,12 @@ export const TripDetailView: React.FC<TripDetailViewProps> = ({
             <span className="px-2.5 py-0.5 rounded-lg text-xs font-medium bg-[#D4A373] text-[#1A1816]">
               基準幣：{baseCurrInfo.flag} {baseCurrInfo.code}
             </span>
+            {isDuoSplitMode && (
+              <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-xs font-medium bg-[#81B29A] text-[#1A1816] shadow-xs">
+                <BookOpen className="w-3 h-3" />
+                <span>iPhone Duo 7.6" 雙欄並排</span>
+              </span>
+            )}
           </div>
 
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-mincho font-bold leading-tight mb-2">
@@ -340,13 +396,44 @@ export const TripDetailView: React.FC<TripDetailViewProps> = ({
         </div>
       </div>
 
-      {/* 3. Main Navigation Tabs */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
-        <div
-          className={`flex items-center gap-1.5 border-b pb-px ${
-            isDark ? 'border-[#38312A]' : 'border-[#EBE4D8]'
-          }`}
-        >
+      {/* 3. iPhone Duo 雙欄視圖 vs 5.4" 外屏單欄分頁視圖 */}
+      {isDuoSplitMode ? (
+        <DuoSplitView
+          trip={trip}
+          summary={summary}
+          filteredExpenses={filteredExpenses}
+          groupedExpensesByDate={groupedExpensesByDate}
+          categoryFilter={categoryFilter}
+          setCategoryFilter={setCategoryFilter}
+          participantFilter={participantFilter}
+          setParticipantFilter={setParticipantFilter}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          settledTransferIds={settledTransferIds}
+          toggleSettledTransfer={toggleSettledTransfer}
+          onAddExpense={onAddExpense}
+          onEditExpense={onEditExpense}
+          onDeleteExpense={onDeleteExpense}
+          onViewExpenseDetail={onViewExpenseDetail}
+          onOpenSettlementShare={onOpenSettlementShare}
+          onOpenLiveRates={onOpenLiveRates}
+          onAddPackingItem={onAddPackingItem}
+          onTogglePackingItem={onTogglePackingItem}
+          onDeletePackingItem={onDeletePackingItem}
+          onAddMemo={onAddMemo}
+          onDeleteMemo={onDeleteMemo}
+          onToggleDuoMode={toggleDuoSplitMode}
+          isDark={isDark}
+        />
+      ) : (
+        <>
+          {/* Main Navigation Tabs */}
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+            <div
+              className={`flex items-center gap-1.5 border-b pb-px ${
+                isDark ? 'border-[#38312A]' : 'border-[#EBE4D8]'
+              }`}
+            >
           <button
             id="tab-btn-expenses"
             onClick={() => setActiveTab('expenses')}
@@ -1277,6 +1364,18 @@ export const TripDetailView: React.FC<TripDetailViewProps> = ({
         )}
 
       </div>
+        </>
+      )}
+
+      {/* 5. iPhone Duo 專屬右側拇指快捷懸浮選單 */}
+      <DuoThumbDock
+        isDuoSplitMode={isDuoSplitMode}
+        onToggleDuoMode={toggleDuoSplitMode}
+        onAddExpense={onAddExpense}
+        onOpenSettlementShare={onOpenSettlementShare}
+        onOpenLiveRates={onOpenLiveRates}
+        isDark={isDark}
+      />
     </div>
   );
 };

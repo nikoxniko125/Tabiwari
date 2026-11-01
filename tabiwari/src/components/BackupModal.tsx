@@ -161,9 +161,17 @@ export const BackupModal: React.FC<BackupModalProps> = ({
             isDark ? 'border-[#38322B] bg-[#2A2521]' : 'border-[#EBE4D8] bg-[#F4EFE6]'
           }`}
         >
-          <h3 className="text-base font-mincho font-semibold">
-            記帳資料備份與管理
-          </h3>
+          <div className="flex items-center gap-2">
+            <h3 className="text-base font-mincho font-semibold">
+              記帳資料備份與管理
+            </h3>
+            <span
+              className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#81B29A]/15 text-[#3D7A64] dark:text-[#81B29A] font-semibold border border-[#81B29A]/30"
+              title="iPhone Duo 雙屏適配版"
+            >
+              v2.1 Duo
+            </span>
+          </div>
           <button
             id="backup-modal-close-btn"
             onClick={onClose}

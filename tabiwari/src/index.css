@@ -65,3 +65,25 @@
 .dark ::-webkit-scrollbar-thumb {
   background: #4A4137;
 }
+
+/* iOS Safe Area & iPhone Duo Fold / Dynamic Island Adaptation */
+.safe-top {
+  padding-top: max(env(safe-area-inset-top), 0px);
+}
+.safe-bottom {
+  padding-bottom: max(env(safe-area-inset-bottom), 12px);
+}
+.safe-left {
+  padding-left: max(env(safe-area-inset-left), 0px);
+}
+.safe-right {
+  padding-right: max(env(safe-area-inset-right), 0px);
+}
+
+/* iPhone Duo Right-Hand Thumb Floating Dock */
+.duo-right-dock {
+  position: fixed;
+  right: max(env(safe-area-inset-right, 0px), 14px);
+  bottom: calc(max(env(safe-area-inset-bottom, 0px), 16px) + 68px);
+  z-index: 35;
+}
