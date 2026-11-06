@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   Plus, BookOpen, Smartphone, TrendingUp, Share2, ChevronUp, Layers, X 
 } from 'lucide-react';
@@ -28,17 +29,12 @@ export const DuoThumbDock: React.FC<DuoThumbDockProps> = ({
     setIsOpen(false);
   };
 
-  return (
-    <aside 
+  if (typeof document === 'undefined') return null;
+
+  return createPortal(
+    <aside
       aria-label="側邊快捷工具列"
-      className="duo-right-dock flex flex-col-reverse items-end gap-2 select-none"
-      style={{
-        position: 'fixed',
-        top: 'calc(env(safe-area-inset-top, 0px) + 48px)',
-        right: 'max(env(safe-area-inset-right, 0px), 10px)',
-        bottom: 'auto',
-        zIndex: 50,
-      }}
+      className="duo-right-dock flex flex-col items-end gap-2 select-none"
     >
       {/* 展開後的次級快捷功能選單（向上展開，避免超出手機螢幕底部） */}
       {isOpen && (
@@ -126,13 +122,13 @@ export const DuoThumbDock: React.FC<DuoThumbDockProps> = ({
         </div>
       )}
 
-      {/* 主要操作列：固定於系統狀態資訊下方；展開選單向下顯示 */}
-      <div className="flex items-center gap-2">
+      {/* 主要操作列：在螢幕最右側垂直排列，位於系統狀態資訊下方 */}
+      <div className="flex flex-col items-center gap-2">
         {/* 次選單開合開關 */}
         <button
           id="duo-dock-menu-toggle-btn"
           onClick={() => setIsOpen(!isOpen)}
-          className={`w-10 h-10 rounded-2xl flex items-center justify-center shadow-lg backdrop-blur-md border transition-all hover:scale-105 active:scale-95 cursor-pointer ${
+          className={`w-11 h-11 rounded-2xl flex items-center justify-center shadow-lg backdrop-blur-md border transition-all hover:scale-105 active:scale-95 cursor-pointer ${
             isOpen
               ? isDark
                 ? 'bg-[#D4A373] text-[#1A1816] border-[#D4A373]'
@@ -150,7 +146,7 @@ export const DuoThumbDock: React.FC<DuoThumbDockProps> = ({
         <button
           id="duo-dock-quick-add-btn"
           onClick={onAddExpense}
-          className={`flex items-center gap-1.5 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold shadow-xl transition-all hover:scale-105 active:scale-95 cursor-pointer ${
+          className={`w-11 min-h-[58px] flex flex-col items-center justify-center gap-1 px-1.5 py-2 rounded-2xl text-[10px] font-semibold shadow-xl transition-all hover:scale-105 active:scale-95 cursor-pointer ${
             isDark
               ? 'bg-[#D4A373] text-[#1A1816] hover:bg-[#C29060] shadow-[#D4A373]/25'
               : 'bg-[#2C2622] text-[#FAF8F3] hover:bg-[#433D39] shadow-black/25'
@@ -158,9 +154,10 @@ export const DuoThumbDock: React.FC<DuoThumbDockProps> = ({
           title="記錄新消費 (速記)"
         >
           <Plus className="w-4 h-4" />
-          <span>記一筆</span>
+          <span className="leading-tight whitespace-nowrap">記一筆</span>
         </button>
       </div>
-    </aside>
+    </aside>,
+    document.body
   );
 };

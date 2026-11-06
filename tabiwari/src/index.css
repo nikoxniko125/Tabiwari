@@ -120,19 +120,21 @@
   gap: 8px;
 }
 
-/* iPhone Duo 右側快捷工具列：固定在系統狀態資訊下方，不參與頁面排版 */
+/* iPhone Duo 右側快捷工具列：Portal 到 body，避免被頁面容器定位/裁切 */
 .duo-right-dock {
-  position: fixed;
-  top: calc(env(safe-area-inset-top, 0px) + 48px);
-  right: max(env(safe-area-inset-right, 0px), 10px);
+  position: fixed !important;
+  /* 狀態列圖示通常佔據頂部約 100–120px；將 dock 放在其下方 */
+  top: max(calc(env(safe-area-inset-top, 0px) + 112px), 126px);
+  right: max(env(safe-area-inset-right, 0px), 8px);
   bottom: auto;
-  z-index: 100;
+  z-index: 9999;
   pointer-events: auto;
+  isolation: isolate;
 }
 
-/* 短螢幕時限制展開選單高度，避免快捷項目超出可視範圍 */
+/* 展開選單向下顯示；短螢幕時可在選單內捲動 */
 .duo-right-dock > div:first-child {
-  max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 120px);
+  max-height: calc(100dvh - max(env(safe-area-inset-top, 0px) + 180px, 194px));
   overflow-y: auto;
   overscroll-behavior: contain;
 }
