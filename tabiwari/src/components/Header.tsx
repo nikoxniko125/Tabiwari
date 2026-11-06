@@ -125,7 +125,7 @@ export const Header: React.FC<HeaderProps> = ({
                     {appName}
                   </span>
                   <span
-                    className={`text-[11px] font-sans px-2 py-0.5 rounded-full font-medium tracking-wider ${
+                    className={`text-[11px] font-sans px-2.5 py-0.5 rounded-full font-medium tracking-wider ${
                       isDark
                         ? 'bg-[#352F28] text-[#D4A373] border border-[#483F34]'
                         : 'bg-[#EFE7DC] text-[#786857] border border-[#DFD3C3]'
@@ -133,25 +133,6 @@ export const Header: React.FC<HeaderProps> = ({
                   >
                     {appSubtitle}
                   </span>
-                  {!isInsideTrip ? (
-                    <span
-                      className="text-[10px] font-mono px-1.5 py-0.5 rounded-md bg-[#81B29A]/15 text-[#3D7A64] dark:text-[#81B29A] font-semibold border border-[#81B29A]/30"
-                      title="版本 2.1"
-                    >
-                      v2.1
-                    </span>
-                  ) : (
-                    <span
-                      className={`inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-lg border transition-colors ${
-                        isDark
-                          ? 'bg-[#2A2521] border-[#3D352D] text-[#D4A373]'
-                          : 'bg-[#F5EFE6] border-[#E8DFC0] text-[#8C6E54]'
-                      }`}
-                    >
-                      <ArrowLeft className="w-3 h-3" />
-                      <span>返回列表</span>
-                    </span>
-                  )}
                 </div>
                 <p
                   className={`text-xs font-sans tracking-wide hidden sm:block ${
@@ -190,8 +171,8 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           )}
 
-          {/* Action Buttons */}
-          <div className="flex items-center gap-1.5 sm:gap-2">
+          {/* Action Buttons: flex-wrap with 8px gap */}
+          <div className="flex flex-wrap items-center gap-2">
             
             {/* Live Exchange Rate Board Button */}
             {onOpenLiveRates && (

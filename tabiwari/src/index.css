@@ -44,6 +44,7 @@
     -webkit-font-smoothing: antialiased;
     margin: 0;
     padding: 0;
+    padding-top: calc(env(safe-area-inset-top, 0px) + 24px);
     min-height: 100%;
     width: 100%;
   }
@@ -112,10 +113,26 @@
   padding-right: max(env(safe-area-inset-right), 0px);
 }
 
-/* iPhone Duo Right-Hand Thumb Floating Dock */
+/* iPhone & Duo Action Bar: Flex Wrap with 8px gap */
+.mobile-action-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* iPhone Duo 右側快捷工具列：固定在系統狀態資訊下方，不參與頁面排版 */
 .duo-right-dock {
   position: fixed;
-  right: max(env(safe-area-inset-right, 0px), 14px);
-  bottom: calc(max(env(safe-area-inset-bottom, 0px), 16px) + 68px);
-  z-index: 35;
+  top: calc(env(safe-area-inset-top, 0px) + 48px);
+  right: max(env(safe-area-inset-right, 0px), 10px);
+  bottom: auto;
+  z-index: 100;
+  pointer-events: auto;
+}
+
+/* 短螢幕時限制展開選單高度，避免快捷項目超出可視範圍 */
+.duo-right-dock > div:first-child {
+  max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 120px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }

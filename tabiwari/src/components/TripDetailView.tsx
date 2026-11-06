@@ -191,36 +191,52 @@ export const TripDetailView: React.FC<TripDetailViewProps> = ({
     <div className={`min-h-screen transition-colors duration-200 ${
       isDark ? 'bg-[#191715] text-[#EDE7DF]' : 'bg-[#FAF8F3] text-[#2C2622]'
     }`}>
-      {/* 1. Hero Cover Header */}
-      <div className="relative w-full h-64 sm:h-80 md:h-96 overflow-hidden bg-[#2C2622]">
-        <img
-          src={trip.coverImage || 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=1600&q=80'}
-          alt={trip.title}
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/20" />
+      {/* 1. 頂部導航與動作按鈕欄：恢復原本頁面流 (normal flow)，清除 absolute / fixed，支援 flex-wrap 自動換行 (gap: 8px) */}
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 pb-3">
+        <div className="flex flex-wrap items-center justify-between gap-2.5">
+          {/* 左側：「← 返回」按鈕 + 目的地標籤 */}
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              id="trip-back-btn"
+              onClick={onBack}
+              className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold border transition-all cursor-pointer ${
+                isDark
+                  ? 'bg-[#23201D] border-[#433B33] text-[#EDE7DF] hover:bg-[#2F2923] hover:text-[#D4A373]'
+                  : 'bg-white border-[#E2D8C8] text-[#2C2622] hover:bg-[#FAF8F3] hover:text-[#8C6E54] shadow-2xs'
+              }`}
+              title="返回旅記列表"
+            >
+              <ArrowLeft className="w-4 h-4 text-[#D4A373]" />
+              <span>返回列表</span>
+            </button>
 
-        {/* Top Floating Navigation */}
-        <div className="absolute top-4 inset-x-0 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between z-10">
-          <button
-            id="trip-back-btn"
-            onClick={onBack}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-black/40 hover:bg-black/60 backdrop-blur-md text-white text-xs font-medium border border-white/10 transition-colors"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>返回旅記列表</span>
-          </button>
+            <div
+              className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium border ${
+                isDark
+                  ? 'bg-[#23201D] border-[#38312A] text-[#EDE7DF]'
+                  : 'bg-white border-[#EAE3D8] text-[#2C2622]'
+              }`}
+            >
+              <MapPin className="w-3.5 h-3.5 text-[#D4A373]" />
+              <span>{trip.country || trip.destination}</span>
+            </div>
+          </div>
 
-          <div className="flex items-center gap-2">
+          {/* 右側：動作按鈕欄（display: flex; flex-wrap: wrap; gap: 8px），手機寬度不足時自動換行 */}
+          <div className="flex flex-wrap items-center gap-2">
             {onOpenLiveRates && (
               <button
                 id="trip-live-rates-btn"
                 onClick={onOpenLiveRates}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-black/40 hover:bg-black/60 backdrop-blur-md text-white text-xs font-medium border border-white/10 transition-colors"
+                className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium border transition-colors cursor-pointer ${
+                  isDark
+                    ? 'bg-[#23201D] border-[#38312A] text-[#81B29A] hover:bg-[#2F2923]'
+                    : 'bg-white border-[#E2D8C8] text-[#3D7A64] hover:bg-[#FAF8F3] shadow-2xs'
+                }`}
                 title="即時匯率看板與換算"
               >
                 <TrendingUp className="w-3.5 h-3.5 text-[#81B29A]" />
-                <span className="hidden sm:inline">即時匯率</span>
+                <span>即時匯率</span>
               </button>
             )}
 
@@ -228,10 +244,12 @@ export const TripDetailView: React.FC<TripDetailViewProps> = ({
             <button
               id="trip-duo-toggle-header-btn"
               onClick={toggleDuoSplitMode}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl backdrop-blur-md text-xs font-medium border transition-all ${
+              className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium border transition-all cursor-pointer ${
                 isDuoSplitMode
-                  ? 'bg-[#D4A373] text-[#1A1816] border-[#D4A373] shadow-md font-semibold'
-                  : 'bg-black/40 hover:bg-black/60 text-white border-white/10'
+                  ? 'bg-[#D4A373] text-[#1A1816] border-[#D4A373] shadow-xs font-semibold'
+                  : isDark
+                  ? 'bg-[#23201D] border-[#38312A] text-[#EDE7DF] hover:bg-[#2F2923]'
+                  : 'bg-white border-[#E2D8C8] text-[#2C2622] hover:bg-[#FAF8F3] shadow-2xs'
               }`}
               title="切換雙欄 / 單欄模式"
             >
@@ -242,7 +260,11 @@ export const TripDetailView: React.FC<TripDetailViewProps> = ({
             <button
               id="trip-share-btn"
               onClick={onOpenSettlementShare}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-black/40 hover:bg-black/60 backdrop-blur-md text-white text-xs font-medium border border-white/10 transition-colors"
+              className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium border transition-colors cursor-pointer ${
+                isDark
+                  ? 'bg-[#23201D] border-[#38312A] text-[#D4A373] hover:bg-[#2F2923]'
+                  : 'bg-white border-[#E2D8C8] text-[#8C6E54] hover:bg-[#FAF8F3] shadow-2xs'
+              }`}
               title="匯出分帳與轉帳清單"
             >
               <Share2 className="w-3.5 h-3.5 text-[#D4A373]" />
@@ -252,11 +274,16 @@ export const TripDetailView: React.FC<TripDetailViewProps> = ({
             <button
               id="trip-edit-header-btn"
               onClick={onEditTrip}
-              className="p-1.5 rounded-xl bg-black/40 hover:bg-black/60 backdrop-blur-md text-white border border-white/10 transition-colors"
+              className={`p-2 rounded-xl border transition-colors cursor-pointer ${
+                isDark
+                  ? 'bg-[#23201D] border-[#38312A] text-[#EDE7DF] hover:bg-[#2F2923]'
+                  : 'bg-white border-[#E2D8C8] text-[#2C2622] hover:bg-[#FAF8F3] shadow-2xs'
+              }`}
               title="編輯旅程與成員"
             >
               <Edit3 className="w-3.5 h-3.5" />
             </button>
+
             <button
               id="trip-delete-header-btn"
               onClick={() => {
@@ -264,13 +291,27 @@ export const TripDetailView: React.FC<TripDetailViewProps> = ({
                   onDeleteTrip();
                 }
               }}
-              className="p-1.5 rounded-xl bg-black/40 hover:bg-[#C55353]/80 backdrop-blur-md text-white border border-white/10 transition-colors"
+              className={`p-2 rounded-xl border transition-colors cursor-pointer ${
+                isDark
+                  ? 'bg-[#23201D] border-[#38312A] text-[#E06D6D] hover:bg-[#3A2222]'
+                  : 'bg-white border-[#E2D8C8] text-[#C55353] hover:bg-[#FDF2F2] shadow-2xs'
+              }`}
               title="刪除旅程"
             >
               <Trash2 className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
+      </div>
+
+      {/* 2. Hero Cover Header */}
+      <div className="relative w-full h-56 sm:h-72 md:h-80 overflow-hidden bg-[#2C2622]">
+        <img
+          src={trip.coverImage || 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=1600&q=80'}
+          alt={trip.title}
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/20" />
 
         {/* Bottom Hero Info */}
         <div className="absolute bottom-6 inset-x-0 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-white">
@@ -1367,14 +1408,13 @@ export const TripDetailView: React.FC<TripDetailViewProps> = ({
         </>
       )}
 
-      {/* 5. 側邊拇指快捷懸浮選單 (含右側 thumb 返回按鈕) */}
+      {/* 3. 右下角懸浮按鈕區塊 (position: fixed; bottom: 24px; right: 16px) */}
       <DuoThumbDock
         isDuoSplitMode={isDuoSplitMode}
         onToggleDuoMode={toggleDuoSplitMode}
         onAddExpense={onAddExpense}
         onOpenSettlementShare={onOpenSettlementShare}
         onOpenLiveRates={onOpenLiveRates}
-        onBack={onBack}
         isDark={isDark}
       />
     </div>
