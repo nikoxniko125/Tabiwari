@@ -121,7 +121,7 @@
 }
 
 /* iPhone Duo 右側系統資訊專用區：真正縮窄 App 根容器，右側不再顯示任何 App 內容。 */
-@media (orientation: landscape) and (min-width: 1000px) and (min-aspect-ratio: 1.38/1) {
+@media (orientation: landscape) and (min-width: 1000px) {
   :root {
     --duo-system-rail-width: 116px;
   }
@@ -133,12 +133,16 @@
   }
 
   #root {
+    display: block;
     box-sizing: border-box;
-    width: calc(100% - var(--duo-system-rail-width)) !important;
-    max-width: calc(100% - var(--duo-system-rail-width)) !important;
+    width: calc(100vw - var(--duo-system-rail-width)) !important;
+    max-width: calc(100vw - var(--duo-system-rail-width)) !important;
+    min-width: 0 !important;
     min-height: 100dvh;
     margin: 0 !important;
-    overflow-x: clip;
+    overflow-x: clip !important;
+    position: relative;
+    isolation: isolate;
   }
 
   .duo-app-shell {
@@ -152,19 +156,23 @@
   body::after {
     content: "";
     position: fixed;
-    z-index: 999;
+    z-index: 99999;
     top: 0;
     right: 0;
     bottom: 0;
     width: var(--duo-system-rail-width);
-    background: var(--bg-main, #191715);
+    background: #191715;
     pointer-events: none;
   }
 
+  html, body {
+    overflow-x: hidden !important;
+  }
+
   .duo-right-dock {
-    top: clamp(150px, 16vh, 184px);
+    top: max(160px, calc(env(safe-area-inset-top, 0px) + 112px));
     right: calc((var(--duo-system-rail-width) - 76px) / 2);
-    z-index: 1000;
+    z-index: 100000;
   }
 }
 
