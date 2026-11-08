@@ -439,7 +439,7 @@ export default function App() {
   };
 
   return (
-    <div className={`min-h-screen flex flex-col font-sans transition-colors duration-200 ${
+    <div className={`duo-app-shell min-h-screen flex flex-col font-sans transition-colors duration-200 ${
       isDark ? 'bg-[#191715] text-[#EDE7DF]' : 'bg-[#FAF8F3] text-[#2C2622]'
     }`}>
       

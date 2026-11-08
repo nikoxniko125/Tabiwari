@@ -12,6 +12,17 @@ export const POPULAR_CURRENCIES: CurrencyOption[] = [
     defaultRateToTWD: 4.1,
   },
   {
+    code: 'MOP',
+    name: '澳門元',
+    symbol: 'MOP$',
+    flag: '🇲🇴',
+    // 澳門元與港幣維持約 1.03:1 聯繫匯率；此值只作離線備用，線上以即時 API 為準。
+    defaultRateToHKD: 0.9709,
+    defaultRateToJPY: 18.93,
+    defaultRateToUSD: 0.1243,
+    defaultRateToTWD: 3.98,
+  },
+  {
     code: 'JPY',
     name: '日圓',
     symbol: '¥',

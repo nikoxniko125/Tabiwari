@@ -120,21 +120,67 @@
   gap: 8px;
 }
 
-/* iPhone Duo 右側快捷工具列：Portal 到 body，避免被頁面容器定位/裁切 */
-.duo-right-dock {
-  position: fixed !important;
-  /* 狀態列圖示通常佔據頂部約 100–120px；將 dock 放在其下方 */
-  top: max(calc(env(safe-area-inset-top, 0px) + 112px), 126px);
-  right: max(env(safe-area-inset-right, 0px), 8px);
-  bottom: auto;
-  z-index: 9999;
-  pointer-events: auto;
-  isolation: isolate;
+/* Duo 右側系統資訊專用留白區：只在寬屏橫向比例啟用，避免影響一般 iPhone。 */
+@media (orientation: landscape) and (min-width: 1000px) and (min-aspect-ratio: 1.38/1) {
+  .duo-app-shell {
+    box-sizing: border-box;
+    padding-right: 104px;
+  }
+
+  body::after {
+    content: "";
+    position: fixed;
+    z-index: 45;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 104px;
+    background: var(--bg-main, #191715);
+    pointer-events: none;
+  }
 }
 
-/* 展開選單向下顯示；短螢幕時可在選單內捲動 */
-.duo-right-dock > div:first-child {
-  max-height: calc(100dvh - max(env(safe-area-inset-top, 0px) + 180px, 194px));
+/* 右側工具列透過 Portal 掛到 body，脫離頁面容器及其 overflow/transform。 */
+.duo-right-dock {
+  position: fixed;
+  top: clamp(140px, 16vh, 180px);
+  right: max(env(safe-area-inset-right, 0px), 12px);
+  z-index: 1000;
+  width: 76px;
+  align-items: center;
+  pointer-events: auto;
+}
+
+.duo-right-dock .duo-dock-primary-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.duo-right-dock .duo-dock-primary-stack > button {
+  width: 68px;
+  min-height: 68px;
+  justify-content: center;
+  flex-direction: column;
+  gap: 3px;
+  padding: 8px 4px;
+  border-radius: 20px;
+}
+
+.duo-right-dock .duo-dock-primary-stack > button span {
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+.duo-right-dock .duo-dock-menu {
+  position: absolute;
+  top: 0;
+  right: calc(100% + 10px);
+  width: max-content;
+  max-width: min(260px, calc(100vw - 110px));
+  max-height: calc(100dvh - 190px);
   overflow-y: auto;
   overscroll-behavior: contain;
 }
