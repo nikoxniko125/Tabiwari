@@ -120,23 +120,51 @@
   gap: 8px;
 }
 
-/* Duo 右側系統資訊專用留白區：只在寬屏橫向比例啟用，避免影響一般 iPhone。 */
+/* iPhone Duo 右側系統資訊專用區：真正縮窄 App 根容器，右側不再顯示任何 App 內容。 */
 @media (orientation: landscape) and (min-width: 1000px) and (min-aspect-ratio: 1.38/1) {
-  .duo-app-shell {
-    box-sizing: border-box;
-    padding-right: 104px;
+  :root {
+    --duo-system-rail-width: 116px;
   }
 
+  /* App 的實際版面只使用左側寬度，而不是讓內容延伸到右側再靠遮罩蓋住。 */
+  body {
+    width: 100%;
+    overflow-x: hidden;
+  }
+
+  #root {
+    box-sizing: border-box;
+    width: calc(100% - var(--duo-system-rail-width)) !important;
+    max-width: calc(100% - var(--duo-system-rail-width)) !important;
+    min-height: 100dvh;
+    margin: 0 !important;
+    overflow-x: clip;
+  }
+
+  .duo-app-shell {
+    box-sizing: border-box;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 100dvh;
+  }
+
+  /* 右側獨立底色層：覆蓋任何可能延伸出來的圖片、Header 或卡片。 */
   body::after {
     content: "";
     position: fixed;
-    z-index: 45;
+    z-index: 999;
     top: 0;
     right: 0;
     bottom: 0;
-    width: 104px;
+    width: var(--duo-system-rail-width);
     background: var(--bg-main, #191715);
     pointer-events: none;
+  }
+
+  .duo-right-dock {
+    top: clamp(150px, 16vh, 184px);
+    right: calc((var(--duo-system-rail-width) - 76px) / 2);
+    z-index: 1000;
   }
 }
 
