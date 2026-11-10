@@ -120,32 +120,67 @@
   gap: 8px;
 }
 
-/* Wide / foldable inner-screen layout.
-   Duo's fully-open portrait viewport can be tall rather than landscape,
-   so do not require orientation: landscape to reveal the app-owned rail.
-   This is an in-page toolbar, not the iOS-reserved system rail. */
-@media (min-width: 650px) and (min-height: 900px),
-       (orientation: landscape) and (min-width: 1000px) {
+/* iPhone Duo fully-open inner display: reserve an app-owned right toolbar lane.
+   The operating-system status/control overlay remains OS-owned; the web app
+   places its own toolbar below that overlay in the webpage viewport. */
+@media (min-width: 900px) and (min-height: 1100px) and (orientation: portrait) {
+  #root {
+    box-sizing: border-box;
+    width: calc(100vw - 96px) !important;
+    max-width: calc(100vw - 96px) !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+  }
+
   .duo-app-shell {
     box-sizing: border-box;
     width: 100%;
     min-height: 100dvh;
-    padding-right: 96px;
+  }
+
+  html, body {
+    overflow-x: hidden !important;
   }
 
   .duo-right-dock {
-    display: flex;
-    top: max(190px, calc(env(safe-area-inset-top, 0px) + 180px));
-    right: 12px;
+    display: flex !important;
+    top: max(370px, calc(env(safe-area-inset-top, 0px) + 330px));
+    right: 10px;
     z-index: 1000;
   }
 }
 
-/* On phone-sized viewports the floating rail stays hidden; the page's
-   regular actions remain available in the trip interface. */
+/* Wide landscape foldable/tablet layout: use the same app-owned side lane. */
+@media (orientation: landscape) and (min-width: 1000px) {
+  #root {
+    box-sizing: border-box;
+    width: calc(100vw - 96px) !important;
+    max-width: calc(100vw - 96px) !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+  }
+
+  .duo-app-shell {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 100dvh;
+  }
+
+  .duo-right-dock {
+    display: flex !important;
+    top: max(160px, calc(env(safe-area-inset-top, 0px) + 112px));
+    right: 10px;
+    z-index: 1000;
+  }
+}
+
+/* 右側工具列透過 Portal 掛到 body，脫離頁面容器及其 overflow/transform。 */
 .duo-right-dock {
-  display: none;
+  display: flex;
   position: fixed;
+  top: clamp(140px, 16vh, 180px);
+  right: max(env(safe-area-inset-right, 0px), 12px);
+  z-index: 1000;
   width: 76px;
   align-items: center;
   pointer-events: auto;
